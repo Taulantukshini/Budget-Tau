@@ -1028,6 +1028,11 @@ body.light .ctx-sep { background: rgba(0,0,0,0.06); }
       <div id="mob-date-day" style="font-size:.85rem;font-weight:600;color:var(--blue);line-height:1;">—</div>
       <div id="mob-date-label" style="font-size:.62rem;color:var(--muted);margin-top:1px;">—</div>
     </div>
+    <button id="mob-menu-btn" onclick="openSidePanel()" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
     <button class="theme-toggle-btn" id="theme-btn" onclick="toggleTheme()" title="Thème">🌙</button>
     <button class="mob-add-btn" onclick="openModal()">＋</button>
   </div>
@@ -1920,6 +1925,11 @@ body.light .ctx-sep { background: rgba(0,0,0,0.06); }
     </div>
     <div class="tab-item" id="tab-recurrents" onclick="tabNav('recurrents')">
       <div class="tab-icon"><span class="pace-icon" style="display:inline-flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span></div><div class="tab-dot"></div><div class="tab-label">Récurr.</div>
+    </div>
+    <div class="tab-item" id="tab-menu" onclick="openSidePanel()">
+      <span style="display:flex;justify-content:center;margin-bottom:2px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></span>
+      <div class="tab-dot"></div>
+      <div class="tab-label">Menu</div>
     </div>
     <div class="tab-item" id="tab-categories" onclick="tabNav('categories')">
       <span style="display:flex;justify-content:center;margin-bottom:2px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="14" width="4" height="7" rx="1"/><rect x="10" y="9" width="4" height="12" rx="1"/><rect x="17" y="4" width="4" height="17" rx="1"/></svg></span><div class="tab-dot"></div><div class="tab-label">Catég.</div>
