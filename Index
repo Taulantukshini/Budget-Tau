@@ -1,0 +1,2939 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#060608">
+<meta name="apple-mobile-web-app-title" content="PACE">
+<title>PACE — Ton rythme financier</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{touch-action:pan-x pan-y;-ms-touch-action:pan-x pan-y;}
+:root{
+–bg:#060608;–bg1:#0c0d10;–bg2:#111318;–bg3:#181b21;
+–border:#1e2128;–border2:#252830;
+–text:#f0f1f5;–muted:#4a4f5e;–muted2:#6b7280;
+–cyan:#00d4ff;–cyan-dim:rgba(0,212,255,.12);
+–green:#00e5a0;–green-dim:rgba(0,229,160,.12);
+–amber:#ffb020;–amber-dim:rgba(255,176,32,.12);
+–red:#ff4d6a;–red-dim:rgba(255,77,106,.12);
+–violet:#8b5cf6;–violet-dim:rgba(139,92,246,.12);
+–radius:14px;–radius-sm:10px;
+–safe-top:env(safe-area-inset-top,0px);
+–safe-bot:env(safe-area-inset-bottom,0px);
+–tab-h:60px;–sidebar:220px;
+}
+html{height:100%;background:var(–bg);}
+body{height:100%;min-height:100vh;background:var(–bg);color:var(–text);font-family:‘Syne’,sans-serif;overflow:hidden;}
+.shell{display:flex;height:100%;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{width:var(–sidebar);flex-shrink:0;background:var(–bg1);border-right:1px solid var(–border);display:flex;flex-direction:column;overflow:hidden;position:relative;}
+.sidebar::before{content:’’;position:absolute;top:-80px;left:-60px;width:240px;height:240px;background:radial-gradient(circle,rgba(0,212,255,.06) 0%,transparent 70%);pointer-events:none;}
+.sb-logo{padding:1.3rem 1.1rem 1rem;border-bottom:1px solid var(–border);}
+.sb-logo-mark{display:flex;align-items:center;gap:.6rem;}
+.sb-logo-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#00d4ff,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;color:#000;flex-shrink:0;}
+.sb-logo-text{font-size:.9rem;font-weight:700;}
+.sb-logo-sub{font-size:.6rem;color:var(–muted2);margin-top:.1rem;font-family:‘JetBrains Mono’,monospace;}
+.sb-month{padding:.75rem 1rem;border-bottom:1px solid var(–border);}
+.sb-month-label{font-size:.58rem;text-transform:uppercase;letter-spacing:.12em;color:var(–muted);margin-bottom:.45rem;}
+.sb-nav{flex:1;padding:.5rem .55rem;overflow-y:auto;scrollbar-width:none;}
+.sb-section-label{font-size:.56rem;text-transform:uppercase;letter-spacing:.14em;color:var(–muted);padding:.5rem .5rem .25rem;margin-top:.3rem;}
+.nav-item{display:flex;align-items:center;gap:.6rem;padding:.5rem .6rem;border-radius:8px;cursor:pointer;font-size:.8rem;font-weight:500;color:var(–muted2);transition:all .15s;position:relative;border:1px solid transparent;margin-bottom:.12rem;}
+.nav-item:hover{color:var(–text);background:var(–bg3);}
+.nav-item.active{color:var(–cyan);background:var(–cyan-dim);border-color:rgba(0,212,255,.2);}
+.nav-item.active::before{content:’’;position:absolute;left:0;top:20%;bottom:20%;width:2px;background:var(–cyan);border-radius:0 2px 2px 0;}
+.nav-icon{font-size:.9rem;width:18px;text-align:center;flex-shrink:0;}
+.sb-kpis{padding:.5rem .75rem .75rem;border-top:1px solid var(–border);}
+.sb-kpi{display:flex;justify-content:space-between;align-items:center;padding:.25rem 0;}
+.sb-kpi-label{font-size:.62rem;color:var(–muted);text-transform:uppercase;letter-spacing:.07em;}
+.sb-kpi-val{font-size:.72rem;font-weight:600;font-family:‘JetBrains Mono’,monospace;}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.topbar{padding:.85rem 1.6rem;border-bottom:1px solid var(–border);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-shrink:0;background:var(–bg1);}
+.topbar-title{font-size:.95rem;font-weight:700;letter-spacing:-.02em;}
+.topbar-sub{font-size:.67rem;color:var(–muted2);margin-top:.05rem;font-family:‘JetBrains Mono’,monospace;}
+.topbar-right{display:flex;gap:.5rem;align-items:center;}
+.mob-header{display:none;flex-shrink:0;padding:calc(var(–safe-top) + .7rem) 1rem .7rem;background:var(–bg1);border-bottom:1px solid var(–border);align-items:center;justify-content:space-between;gap:.75rem;}
+.mob-logo{display:flex;align-items:center;gap:.5rem;}
+.mob-logo-icon{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#00d4ff,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:#000;}
+.mob-logo-text{font-size:.85rem;font-weight:700;}
+.mob-month-sel{background:var(–bg3);border:1px solid var(–border2);border-radius:8px;padding:.35rem .65rem;color:var(–text);font-family:‘Syne’,sans-serif;font-size:.75rem;font-weight:600;outline:none;appearance:none;max-width:140px;}
+.mob-add-btn{width:32px;height:32px;border-radius:8px;background:var(–cyan);border:none;color:#000;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* PAGES */
+.pages{flex:1;overflow:hidden;position:relative;min-width:0;}
+.page{display:none;position:absolute;inset:0;overflow-y:auto;padding:1.4rem 1.5rem 1.4rem;scrollbar-width:thin;scrollbar-color:var(–border) transparent;-webkit-overflow-scrolling:touch;}
+.page.active{display:block;animation:fadeUp .2s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* BOTTOM TAB BAR */
+.tab-bar{display:none;flex-shrink:0;background:rgba(12,13,16,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(–border);padding:.5rem 0 calc(var(–safe-bot) + .3rem);align-items:flex-start;justify-content:space-around;}
+.tab-item{display:flex;flex-direction:column;align-items:center;gap:.25rem;cursor:pointer;padding:.2rem .5rem;border-radius:10px;transition:all .15s;min-width:50px;flex:1;}
+.tab-icon{font-size:1.2rem;line-height:1;transition:transform .15s;}
+.tab-label{font-size:.52rem;font-weight:600;color:var(–muted2);text-transform:uppercase;letter-spacing:.06em;transition:color .15s;}
+.tab-item.active .tab-icon{transform:scale(1.1);}
+.tab-item.active .tab-label{color:var(–cyan);}
+.tab-dot{width:4px;height:4px;border-radius:50%;background:var(–cyan);margin:0 auto;opacity:0;transition:opacity .15s;}
+.tab-item.active .tab-dot{opacity:1;}
+
+/* COMPONENTS */
+.month-select,.fselect{width:100%;background:var(–bg3);border:1px solid var(–border2);border-radius:var(–radius-sm);padding:.5rem .75rem;color:var(–text);font-family:‘Syne’,sans-serif;font-size:.82rem;font-weight:500;outline:none;cursor:pointer;appearance:none;background-image:url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘10’ height=‘6’%3E%3Cpath d=‘M0 0l5 6 5-6z’ fill=’%234a4f5e’/%3E%3C/svg%3E”);background-repeat:no-repeat;background-position:right .65rem center;padding-right:1.8rem;transition:border-color .2s;}
+.month-select:focus,.fselect:focus{border-color:var(–cyan);}
+.month-select option,.fselect option{background:#111318;}
+.card{background:var(–bg2);border:1px solid var(–border);border-radius:var(–radius);padding:1rem 1.1rem;}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;}
+.card-title{font-size:.62rem;text-transform:uppercase;letter-spacing:.12em;color:var(–muted2);font-weight:600;}
+.kpi-card{background:var(–bg2);border:1px solid var(–border);border-radius:var(–radius);padding:.9rem 1rem;}
+.kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.45rem;}
+.kpi-label{font-size:.58rem;text-transform:uppercase;letter-spacing:.12em;color:var(–muted);}
+.kpi-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.8rem;}
+.kpi-value{font-size:1.35rem;font-weight:700;letter-spacing:-.03em;font-family:‘JetBrains Mono’,monospace;line-height:1;}
+.kpi-value span{font-size:.65rem;font-weight:400;color:var(–muted2);margin-left:.15rem;}
+.kpi-bar{height:2px;border-radius:999px;margin-top:.55rem;background:var(–bg3);}
+.kpi-bar-fill{height:100%;border-radius:999px;transition:width .6s cubic-bezier(.23,1,.32,1);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.42rem .9rem;border-radius:8px;font-size:.75rem;font-weight:600;cursor:pointer;border:none;font-family:‘Syne’,sans-serif;transition:all .18s;}
+.btn-cyan{background:var(–cyan);color:#000;}
+.btn-cyan:hover{background:#22ddff;}
+.btn-ghost{background:var(–bg3);color:var(–muted2);border:1px solid var(–border2);}
+.btn-ghost:hover{color:var(–text);}
+.btn-sm{padding:.28rem .65rem;font-size:.7rem;}
+.btn-danger{background:var(–red-dim);color:var(–red);border:1px solid rgba(255,77,106,.2);padding:.22rem .5rem;font-size:.7rem;border-radius:6px;cursor:pointer;font-family:‘Syne’,sans-serif;font-weight:600;}
+.btn-edit{background:var(–cyan-dim);color:var(–cyan);border:1px solid rgba(0,212,255,.2);padding:.22rem .5rem;font-size:.7rem;border-radius:6px;cursor:pointer;font-family:‘Syne’,sans-serif;font-weight:600;}
+.chart-box{position:relative;}
+.h160{height:160px;}.h200{height:200px;}.h220{height:220px;}
+
+/* PROGRESS */
+.prog-item{margin-bottom:.9rem;}
+.prog-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem;flex-wrap:wrap;gap:.25rem;}
+.prog-name{font-size:.78rem;font-weight:600;display:flex;align-items:center;gap:.4rem;}
+.prog-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.prog-info{font-size:.65rem;color:var(–muted2);font-family:‘JetBrains Mono’,monospace;}
+.prog-track{height:5px;background:var(–bg3);border-radius:999px;overflow:visible;position:relative;}
+.prog-fill{height:100%;border-radius:999px;transition:width .7s cubic-bezier(.23,1,.32,1);position:relative;}
+.prog-fill::after{content:’’;position:absolute;right:-1px;top:-3px;width:10px;height:10px;border-radius:50%;background:inherit;border:2px solid var(–bg2);}
+.prog-tag{font-size:.58rem;font-weight:700;padding:.08rem .32rem;border-radius:4px;margin-left:.3rem;}
+.tag-over{background:var(–red-dim);color:var(–red);}
+.tag-ok{background:var(–green-dim);color:var(–green);}
+.tag-warn{background:var(–amber-dim);color:var(–amber);}
+
+/* ALERT BANNER */
+.alert-banner{background:var(–red-dim);border:1px solid rgba(255,77,106,.3);border-radius:var(–radius-sm);padding:.6rem .9rem;margin-bottom:.85rem;font-size:.75rem;color:var(–red);display:flex;align-items:flex-start;gap:.5rem;line-height:1.5;}
+.alert-banner.warn{background:var(–amber-dim);border-color:rgba(255,176,32,.3);color:var(–amber);}
+
+/* EXP ITEM with swipe */
+.exp-list{display:flex;flex-direction:column;gap:.45rem;}
+.exp-wrap{position:relative;overflow:hidden;border-radius:var(–radius-sm);}
+.exp-swipe-bg{position:absolute;right:0;top:0;bottom:0;display:flex;align-items:center;padding:0 1rem;gap:.5rem;background:var(–red-dim);border-radius:var(–radius-sm);}
+.exp-swipe-bg span{font-size:.7rem;color:var(–red);font-weight:700;}
+.exp-item{display:grid;grid-template-columns:auto 1fr auto auto auto;align-items:center;gap:.55rem;background:var(–bg2);border:1px solid var(–border);border-radius:var(–radius-sm);padding:.65rem .85rem;transition:transform .25s ease,opacity .2s;position:relative;touch-action:pan-y;user-select:none;}
+.exp-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.exp-name{font-size:.8rem;font-weight:600;}
+.exp-meta{font-size:.65rem;color:var(–muted2);margin-top:.08rem;font-family:‘JetBrains Mono’,monospace;}
+.exp-amount{font-size:.85rem;font-weight:700;font-family:‘JetBrains Mono’,monospace;white-space:nowrap;}
+.exp-cat-badge{font-size:.62rem;padding:.1rem .4rem;border-radius:4px;font-weight:600;display:inline-block;}
+
+/* SEARCH */
+.search-bar{position:relative;margin-bottom:.85rem;}
+.search-bar input{width:100%;background:var(–bg3);border:1px solid var(–border2);border-radius:var(–radius-sm);padding:.5rem .75rem .5rem 2rem;color:var(–text);font-family:‘Syne’,sans-serif;font-size:.82rem;outline:none;transition:border-color .2s;}
+.search-bar input:focus{border-color:var(–cyan);}
+.search-bar::before{content:‘🔍’;position:absolute;left:.6rem;top:50%;transform:translateY(-50%);font-size:.75rem;pointer-events:none;}
+
+/* FORM */
+.fgroup{margin-bottom:.75rem;}
+.flabel{display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(–muted2);margin-bottom:.32rem;}
+.finput{width:100%;background:var(–bg3);border:1px solid var(–border2);border-radius:var(–radius-sm);padding:.52rem .75rem;color:var(–text);font-family:‘Syne’,sans-serif;font-size:.88rem;outline:none;transition:border-color .2s;}
+.finput:focus{border-color:var(–cyan);}
+.finput::placeholder{color:var(–muted);}
+.form-layout{display:grid;grid-template-columns:320px 1fr;gap:1.1rem;align-items:start;}
+.form-card{background:var(–bg2);border:1px solid var(–border);border-radius:var(–radius);padding:1.1rem;position:sticky;top:0;}
+.form-title{font-size:.82rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:.45rem;}
+
+/* RECURRING */
+.recur-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.5rem;margin-bottom:.85rem;}
+.recur-card{background:var(–bg2);border:1px solid var(–border);border-radius:var(–radius-sm);padding:.65rem .75rem;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:.5rem;}
+.recur-card:hover{border-color:var(–cyan);background:var(–cyan-dim);}
+.recur-card.selected{border-color:var(–cyan);background:var(–cyan-dim);}
+.recur-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.recur-name{font-size:.75rem;font-weight:600;flex:1;}
+.recur-amt{font-size:.7rem;font-family:‘JetBrains Mono’,monospace;color:var(–muted2);}
+.recur-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(–border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.7rem;}
+.recur-card.selected .recur-check{background:var(–cyan);border-color:var(–cyan);color:#000;}
+
+/* PROJECTION */
+.proj-card{background:linear-gradient(135deg,rgba(0,229,160,.06),rgba(0,212,255,.04));border:1px solid rgba(0,229,160,.2);border-radius:var(–radius);padding:1rem 1.1rem;margin-bottom:.85rem;}
+.proj-title{font-size:.62rem;text-transform:uppercase;letter-spacing:.12em;color:var(–green);margin-bottom:.65rem;font-weight:600;}
+.proj-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.35rem;font-size:.8rem;}
+.proj-label{color:var(–muted2);}
+.proj-val{font-family:‘JetBrains Mono’,monospace;font-weight:600;}
+
+/* SCAN */
+.scan-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.65rem;background:var(–bg3);border:1.5px dashed var(–border2);border-radius:var(–radius-sm);color:var(–muted2);font-family:‘Syne’,sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;margin-bottom:.75rem;}
+.scan-btn:hover{border-color:var(–cyan);color:var(–cyan);}
+.scan-preview{width:100%;border-radius:var(–radius-sm);margin-bottom:.75rem;overflow:hidden;position:relative;display:none;}
+.scan-preview img{width:100%;max-height:120px;object-fit:cover;border-radius:var(–radius-sm);opacity:.7;}
+.scan-preview-label{position:absolute;bottom:6px;left:8px;font-size:.62rem;font-family:‘JetBrains Mono’,monospace;color:var(–amber);background:rgba(0,0,0,.7);padding:2px 7px;border-radius:4px;}
+.scan-result{background:rgba(255,176,32,.06);border:1px solid rgba(255,176,32,.2);border-radius:var(–radius-sm);padding:.6rem .8rem;margin-bottom:.75rem;font-size:.72rem;color:var(–amber);font-family:‘JetBrains Mono’,monospace;display:none;}
+
+/* DATA TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:.77rem;}
+.data-table th{padding:.48rem .75rem;text-align:left;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(–muted);font-weight:600;border-bottom:1px solid var(–border);background:var(–bg1);position:sticky;top:0;z-index:1;}
+.data-table th.r,.data-table td.r{text-align:right;}
+.data-table td{padding:.48rem .75rem;border-bottom:1px solid var(–border);color:var(–muted2);font-family:‘JetBrains Mono’,monospace;font-size:.72rem;}
+.data-table td.nc{color:var(–text);font-family:‘Syne’,sans-serif;font-size:.78rem;font-weight:500;}
+.data-table tr:hover td{background:rgba(255,255,255,.012);}
+.data-table tfoot td{color:var(–text);font-weight:600;border-top:2px solid var(–border2);border-bottom:none;}
+.data-table tfoot tr:first-child td{background:var(–bg1);}
+.pos{color:var(–green)!important;}.neg{color:var(–red)!important;}.hl{color:var(–cyan)!important;}
+
+/* MISC */
+.empty{text-align:center;padding:2.5rem 1rem;color:var(–muted);}
+.empty-ico{font-size:2rem;margin-bottom:.65rem;opacity:.35;}
+.month-badge{display:inline-flex;align-items:center;gap:.45rem;padding:.28rem .7rem;border-radius:999px;background:var(–cyan-dim);border:1px solid rgba(0,212,255,.2);font-size:.65rem;font-weight:600;color:var(–cyan);font-family:‘JetBrains Mono’,monospace;margin-bottom:.85rem;}
+.stack{display:flex;flex-direction:column;gap:.85rem;}
+.sep{height:1px;background:var(–border);margin:.85rem 0;}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:300;align-items:flex-end;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(–bg2);border:1px solid var(–border2);border-radius:20px 20px 0 0;padding:1.5rem 1.25rem calc(1.25rem + var(–safe-bot));width:100%;max-width:500px;max-height:90vh;overflow-y:auto;animation:slideUp .25s cubic-bezier(.34,1.56,.64,1);}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;border-radius:2px;background:var(–border2);margin:0 auto .9rem;}
+.modal-title{font-size:1rem;font-weight:700;margin-bottom:1.1rem;}
+.modal-actions{display:flex;gap:.6rem;margin-top:1rem;}
+
+.topbar{display:none!important;}.mob-header{display:flex!important;}.tab-bar{display:flex!important;}
+.page{padding:.9rem .95rem calc(var(–tab-h) + var(–safe-bot) + 1.1rem);}
+.g4{grid-template-columns:1fr 1fr;}.g2{grid-template-columns:1fr;}
+.form-layout{grid-template-columns:1fr;}.form-card{position:static;}
+.kpi-value{font-size:1.2rem;}
+}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(–border2);border-radius:2px;}
+
+/* PIN LOCK */
+.pin-screen{position:fixed;inset:0;background:var(–bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;}
+.pin-logo{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#00d4ff,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:#000;}
+.pin-title{font-size:1rem;font-weight:700;color:var(–text);}
+.pin-subtitle{font-size:.75rem;color:var(–muted2);text-align:center;max-width:220px;line-height:1.5;}
+.pin-dots{display:flex;gap:.75rem;margin:.5rem 0;}
+.pin-dot{width:14px;height:14px;border-radius:50%;background:var(–bg3);border:1.5px solid var(–border2);transition:all .2s;}
+.pin-dot.filled{background:var(–cyan);border-color:var(–cyan);}
+.pin-dot.error{background:var(–red);border-color:var(–red);}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,72px);gap:.6rem;}
+.pin-key{width:72px;height:72px;border-radius:50%;background:var(–bg2);border:1px solid var(–border2);color:var(–text);font-size:1.3rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:‘Syne’,sans-serif;}
+.pin-key:active{background:var(–cyan-dim);border-color:var(–cyan);transform:scale(.93);}
+.pin-key.del{font-size:.9rem;color:var(–muted2);}
+.pin-key.bio{font-size:1.4rem;}
+.pin-error{font-size:.72rem;color:var(–red);min-height:1rem;text-align:center;}
+.pin-link{font-size:.68rem;color:var(–muted2);cursor:pointer;text-decoration:underline;margin-top:.5rem;}
+
+/* GOAL */
+.goal-ring-wrap{display:flex;flex-direction:column;align-items:center;gap:.5rem;margin:.5rem 0;}
+.goal-ring{position:relative;width:120px;height:120px;}
+.goal-ring canvas{position:absolute;inset:0;}
+.goal-ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.goal-ring-pct{font-size:1.4rem;font-weight:700;font-family:‘JetBrains Mono’,monospace;color:var(–green);}
+.goal-ring-sub{font-size:.6rem;color:var(–muted2);}
+.goal-milestone{display:flex;align-items:center;gap:.5rem;font-size:.72rem;padding:.35rem .6rem;background:var(–bg3);border-radius:6px;margin-bottom:.35rem;}
+.goal-milestone.done{background:var(–green-dim);}
+.goal-milestone-icon{font-size:.85rem;}
+
+/* SCORE */
+.score-ring-wrap{display:flex;flex-direction:column;align-items:center;gap:.4rem;}
+.score-big{font-size:3rem;font-weight:800;font-family:‘JetBrains Mono’,monospace;line-height:1;}
+.score-grade{font-size:.8rem;font-weight:600;padding:.2rem .7rem;border-radius:20px;margin-top:.2rem;}
+.score-item{display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:.5px solid var(–border);font-size:.75rem;}
+.score-item:last-child{border-bottom:none;}
+.score-item-pts{font-family:‘JetBrains Mono’,monospace;font-weight:600;}
+
+/* HABITS */
+.habit-card{background:var(–bg2);border:1px solid var(–border);border-radius:var(–radius-sm);padding:.75rem .9rem;margin-bottom:.6rem;}
+.habit-title{font-size:.78rem;font-weight:600;margin-bottom:.2rem;}
+.habit-detail{font-size:.68rem;color:var(–muted2);line-height:1.5;}
+.habit-val{font-size:.85rem;font-weight:700;font-family:‘JetBrains Mono’,monospace;float:right;margin-top:-.1rem;}
+.habit-positive{border-left:3px solid var(–green);}
+.habit-negative{border-left:3px solid var(–red);}
+.habit-neutral{border-left:3px solid var(–amber);}
+
+/* SETTINGS PAGE */
+.settings-section{margin-bottom:1.2rem;}
+.settings-title{font-size:.6rem;text-transform:uppercase;letter-spacing:.14em;color:var(–muted);margin-bottom:.5rem;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:.65rem .9rem;background:var(–bg2);border:1px solid var(–border);border-radius:var(–radius-sm);margin-bottom:.4rem;cursor:pointer;transition:background .15s;}
+.settings-row:hover{background:var(–bg3);}
+.settings-row-left{display:flex;align-items:center;gap:.7rem;}
+.settings-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;}
+.settings-label{font-size:.82rem;font-weight:500;}
+.settings-sub{font-size:.65rem;color:var(–muted2);margin-top:.05rem;}
+.settings-arrow{color:var(–muted);font-size:.75rem;}
+.toggle{width:38px;height:22px;border-radius:11px;background:var(–bg3);border:1px solid var(–border2);position:relative;cursor:pointer;transition:background .2s;}
+.toggle.on{background:var(–cyan);}
+.toggle::after{content:’’;position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform .2s;}
+.toggle.on::after{transform:translateX(16px);}
+
+/* WIZARD */
+.wizard-wrap{max-width:520px;margin:0 auto;}
+.wizard-steps{display:flex;gap:0;margin-bottom:1.5rem;border-radius:var(–radius-sm);overflow:hidden;border:1px solid var(–border);}
+.wizard-step-dot{flex:1;padding:.45rem .3rem;text-align:center;font-size:.6rem;font-family:‘JetBrains Mono’,monospace;color:var(–muted);background:var(–bg2);border-right:1px solid var(–border);transition:all .2s;cursor:pointer;}
+.wizard-step-dot:last-child{border-right:none;}
+.wizard-step-dot.active{background:var(–cyan-dim);color:var(–cyan);font-weight:600;}
+.wizard-step-dot.done{background:var(–green-dim);color:var(–green);}
+.wizard-panel{display:none;}
+.wizard-panel.active{display:block;animation:fadeUp .2s ease;}
+.wizard-title{font-size:1.1rem;font-weight:700;margin-bottom:.35rem;}
+.wizard-sub{font-size:.78rem;color:var(–muted2);margin-bottom:1.2rem;line-height:1.5;}
+.wizard-nav{display:flex;gap:.6rem;margin-top:1.2rem;}
+.tag-chip{display:inline-flex;align-items:center;gap:.3rem;padding:.28rem .65rem;border-radius:20px;background:var(–bg3);border:1px solid var(–border2);font-size:.72rem;cursor:pointer;transition:all .15s;margin:.2rem;}
+.tag-chip.selected{background:var(–cyan-dim);border-color:var(–cyan);color:var(–cyan);}
+.cat-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .8rem;border-radius:20px;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s;margin:.2rem;border:1.5px solid transparent;}
+.cat-chip.selected{border-style:solid;}
+.income-row{display:grid;grid-template-columns:1fr auto auto;gap:.5rem;align-items:center;margin-bottom:.5rem;}
+.budget-row-edit{display:grid;grid-template-columns:1fr auto;gap:.5rem;align-items:center;margin-bottom:.45rem;}
+.budget-row-edit .finput{padding:.38rem .6rem;font-size:.8rem;}
+.add-row-btn{display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(–cyan);cursor:pointer;padding:.3rem 0;background:none;border:none;font-family:‘Syne’,sans-serif;font-weight:600;}
+
+/* BUDGET EDITOR */
+.budget-editor-tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem;}
+.budget-editor-tab{padding:.3rem .75rem;border-radius:20px;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid var(–border2);background:var(–bg3);color:var(–muted2);transition:all .15s;}
+.budget-editor-tab.active{background:var(–cyan-dim);border-color:var(–cyan);color:var(–cyan);}
+.be-row{display:grid;align-items:center;gap:.5rem;padding:.45rem .6rem;border-bottom:.5px solid var(–border);background:var(–bg2);border-radius:0;}
+.be-row:first-child{border-radius:var(–radius-sm) var(–radius-sm) 0 0;}
+.be-row:last-child{border-bottom:none;border-radius:0 0 var(–radius-sm) var(–radius-sm);}
+.be-name{font-size:.78rem;font-weight:500;color:var(–text);}
+.be-cat{font-size:.6rem;padding:.08rem .35rem;border-radius:4px;font-weight:600;}
+.be-input{background:var(–bg3);border:1px solid var(–border2);border-radius:6px;padding:.3rem .5rem;color:var(–text);font-family:‘JetBrains Mono’,monospace;font-size:.75rem;width:80px;text-align:right;outline:none;}
+.be-input:focus{border-color:var(–cyan);}
+.be-del{background:none;border:none;color:var(–muted);cursor:pointer;font-size:.85rem;padding:2px 4px;transition:color .15s;}
+.be-del:hover{color:var(–red);}
+.be-section-head{display:flex;align-items:center;justify-content:space-between;padding:.4rem .6rem;background:var(–bg1);border-radius:var(–radius-sm) var(–radius-sm) 0 0;border:1px solid var(–border);border-bottom:.5px solid var(–border);}
+.be-section-title{font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(–muted2);}
+.profile-card{background:linear-gradient(135deg,var(–cyan-dim),var(–violet-dim));border:1px solid rgba(0,212,255,.2);border-radius:var(–radius);padding:1.1rem;margin-bottom:.85rem;cursor:pointer;transition:all .2s;}
+.profile-card:hover{border-color:var(–cyan);transform:translateY(-1px);}
+.profile-card h3{font-size:.88rem;font-weight:700;margin-bottom:.2rem;}
+.profile-card p{font-size:.7rem;color:var(–muted2);line-height:1.5;}
+.more-item{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;font-size:.85rem;cursor:pointer;border-bottom:.5px solid var(–border);transition:background .15s;color:var(–text);}
+.more-item:last-child{border-bottom:none;}
+.more-item:active{background:var(–bg3);}
+
+/* THEME TOGGLE */
+body.light-mode{
+–bg:#f5f6fa;–bg1:#ffffff;–bg2:#f0f1f5;–bg3:#e8eaf0;
+–border:#dde1ea;–border2:#c8cdd8;
+–text:#1a1d2e;–muted:#8890a4;–muted2:#6b7280;
+–cyan:#0099cc;–cyan-dim:rgba(0,153,204,.1);
+–green:#00a86b;–green-dim:rgba(0,168,107,.1);
+–amber:#d4820a;–amber-dim:rgba(212,130,10,.1);
+–red:#cc2244;–red-dim:rgba(204,34,68,.1);
+–violet:#6d40c4;–violet-dim:rgba(109,64,196,.1);
+}
+body.light-mode .pin-screen{background:var(–bg);}
+body.light-mode .modal{background:var(–bg1);}
+body.light-mode .more-item{background:var(–bg1);}
+body.light-mode #more-menu > div{background:var(–bg1);}
+body.light-mode #more-menu button{background:var(–bg1);}
+
+.theme-toggle-btn{
+width:34px;height:34px;border-radius:50%;background:var(–bg3);
+border:1px solid var(–border2);color:var(–text);font-size:1rem;
+cursor:pointer;display:flex;align-items:center;justify-content:center;
+transition:all .2s;flex-shrink:0;
+}
+.theme-toggle-btn:hover{background:var(–border2);}
+
+/* WEEK VIEW */
+.week-nav{display:flex;align-items:center;gap:8px;margin-bottom:.85rem;}
+.week-nav-btn{width:30px;height:30px;border-radius:50%;background:var(–bg3);border:1px solid var(–border2);color:var(–text2,var(–muted2));cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:background .15s;}
+.week-nav-btn:hover{background:var(–border2);}
+.week-label{font-size:.75rem;font-weight:600;color:var(–text);font-family:‘JetBrains Mono’,monospace;flex:1;text-align:center;}
+.week-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:.85rem;}
+.week-day{background:var(–bg2);border:1px solid var(–border);border-radius:var(–radius-sm);padding:.5rem .3rem;text-align:center;cursor:pointer;transition:all .15s;min-height:60px;}
+.week-day.today{border-color:var(–cyan);background:var(–cyan-dim);}
+.week-day.has-exp{border-color:var(–amber);}
+.week-day.selected{background:var(–cyan-dim);border-color:var(–cyan);}
+.week-day-name{font-size:.55rem;text-transform:uppercase;letter-spacing:.06em;color:var(–muted);margin-bottom:3px;}
+.week-day-num{font-size:.9rem;font-weight:700;font-family:‘JetBrains Mono’,monospace;color:var(–text);}
+.week-day-amt{font-size:.58rem;font-family:‘JetBrains Mono’,monospace;color:var(–amber);margin-top:2px;}
+
+/* BANK BALANCE */
+.balance-input-row{display:flex;gap:.5rem;align-items:center;margin-bottom:.85rem;}
+.balance-diff{font-size:.75rem;padding:.35rem .75rem;border-radius:var(–radius-sm);font-family:‘JetBrains Mono’,monospace;font-weight:600;}
+
+/* MULTI-USER */
+.user-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;cursor:pointer;border:2px solid transparent;transition:all .2s;flex-shrink:0;}
+.user-avatar.active{border-color:var(–cyan);}
+.user-chip{display:flex;align-items:center;gap:.5rem;padding:.45rem .75rem;background:var(–bg2);border:1px solid var(–border);border-radius:var(–radius-sm);margin-bottom:.4rem;cursor:pointer;transition:all .15s;}
+.user-chip.active{border-color:var(–cyan);background:var(–cyan-dim);}
+.user-chip-name{font-size:.82rem;font-weight:600;flex:1;}
+.user-chip-badge{font-size:.6rem;padding:.1rem .4rem;border-radius:10px;background:var(–cyan-dim);color:var(–cyan);}
+
+/* DASHBOARD DRAG */
+.dash-widget{background:var(–bg2);border:1px solid var(–border);border-radius:var(–radius);padding:1rem 1.1rem;margin-bottom:.85rem;position:relative;transition:opacity .2s,transform .2s;}
+.dash-widget.dragging{opacity:.5;transform:scale(.98);}
+.dash-widget.drag-over{border-color:var(–cyan);background:var(–cyan-dim);}
+.dash-widget-handle{position:absolute;top:.6rem;right:.6rem;color:var(–muted);cursor:grab;font-size:.85rem;padding:2px 4px;border-radius:4px;transition:color .15s;}
+.dash-widget-handle:hover{color:var(–text);}
+.dash-widget-handle:active{cursor:grabbing;}
+.edit-dash-btn{font-size:.65rem;padding:.2rem .5rem;background:var(–bg3);border:1px solid var(–border2);border-radius:6px;color:var(–muted2);cursor:pointer;font-family:‘Syne’,sans-serif;}
+
+/* NOTIFICATIONS */
+.notif-row{display:flex;align-items:flex-start;gap:.75rem;padding:.65rem 0;border-bottom:.5px solid var(–border);}
+.notif-row:last-child{border-bottom:none;}
+.notif-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
+.notif-body{flex:1;}
+.notif-title{font-size:.78rem;font-weight:600;margin-bottom:.1rem;}
+.notif-sub{font-size:.65rem;color:var(–muted2);}
+
+/* ── ANIMATIONS DE TRANSITION ── */
+.page{transition:none;}
+.page.slide-in-right{animation:slideInRight .22s cubic-bezier(.25,.46,.45,.94) forwards;}
+.page.slide-in-left{animation:slideInLeft .22s cubic-bezier(.25,.46,.45,.94) forwards;}
+.page.slide-out-right{animation:slideOutRight .22s cubic-bezier(.25,.46,.45,.94) forwards;}
+.page.slide-out-left{animation:slideOutLeft .22s cubic-bezier(.25,.46,.45,.94) forwards;}
+@keyframes slideInRight{from{opacity:0;transform:translateX(32px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-32px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideOutRight{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(32px)}}
+@keyframes slideOutLeft{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-32px)}}
+
+/* ── PRÉDICTION ── */
+.predict-card{background:linear-gradient(135deg,rgba(255,77,106,.08),rgba(255,176,32,.06));border:1px solid rgba(255,176,32,.25);border-radius:var(–radius);padding:.9rem 1.1rem;margin-bottom:.85rem;}
+.predict-title{font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;color:var(–amber);font-weight:600;margin-bottom:.55rem;}
+.predict-row{display:flex;justify-content:space-between;align-items:baseline;font-size:.78rem;margin-bottom:.28rem;}
+.predict-label{color:var(–muted2);}
+.predict-val{font-family:‘JetBrains Mono’,monospace;font-weight:600;}
+
+/* ── FAVORIS ── */
+.favorites-strip{display:flex;gap:.5rem;overflow-x:auto;scrollbar-width:none;padding-bottom:.3rem;margin-bottom:.85rem;}
+.favorites-strip::-webkit-scrollbar{display:none;}
+.fav-chip{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:.25rem;padding:.5rem .7rem;background:var(–bg2);border:1px solid var(–border);border-radius:var(–radius-sm);cursor:pointer;transition:all .15s;min-width:72px;}
+.fav-chip:active{transform:scale(.95);background:var(–bg3);}
+.fav-chip-icon{font-size:1.1rem;line-height:1;}
+.fav-chip-label{font-size:.6rem;color:var(–muted2);text-align:center;max-width:65px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fav-chip-amt{font-size:.65rem;font-family:‘JetBrains Mono’,monospace;font-weight:600;}
+.fav-chip.add-fav{border-style:dashed;color:var(–muted);}
+
+/* ── DOUBLON ALERT ── */
+.dupli-alert{background:var(–amber-dim);border:1px solid rgba(255,176,32,.35);border-radius:var(–radius-sm);padding:.6rem .85rem;margin-bottom:.6rem;font-size:.73rem;color:var(–amber);display:none;line-height:1.5;}
+
+/* ── VOCAL ── */
+.voice-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.65rem;background:var(–bg3);border:1.5px dashed var(–border2);border-radius:var(–radius-sm);color:var(–muted2);font-family:‘Syne’,sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;margin-bottom:.75rem;}
+.voice-btn:hover{border-color:var(–violet);color:var(–violet);}
+.voice-btn.listening{border-color:var(–red);color:var(–red);animation:pulse 1s ease-in-out infinite;}
+.voice-result{background:var(–violet-dim);border:1px solid rgba(139,92,246,.2);border-radius:var(–radius-sm);padding:.55rem .8rem;font-size:.72rem;color:var(–violet);font-family:‘JetBrains Mono’,monospace;margin-bottom:.75rem;display:none;}
+
+/* ── CAT COLORS ── */
+.color-swatch{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;flex-shrink:0;}
+.color-swatch.selected{border-color:var(–text);transform:scale(1.15);}
+.cat-color-row{display:flex;align-items:center;gap:.6rem;padding:.55rem .8rem;background:var(–bg2);border:.5px solid var(–border);border-radius:var(–radius-sm);margin-bottom:.4rem;}
+
+/* ── AUTO LOCK ── */
+.lock-screen{position:fixed;inset:0;background:var(–bg);z-index:998;display:none;flex-direction:column;align-items:center;justify-content:center;gap:1rem;}
+.lock-screen.visible{display:flex;}
+
+/* SPLASH */
+#splash{position:fixed;inset:0;background:var(–bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;transition:opacity .4s;}
+.splash-logo{width:80px;height:80px;border-radius:22px;background:linear-gradient(135deg,#00d4ff,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;color:#000;transform:scale(.7);opacity:0;transition:all .5s cubic-bezier(.34,1.56,.64,1);}
+.splash-logo.splash-pop{transform:scale(1);opacity:1;}
+.splash-title{font-size:1.4rem;font-weight:800;letter-spacing:-.03em;opacity:0;animation:fadeIn .4s .4s forwards;}
+.splash-bar{width:160px;height:3px;background:var(–bg3);border-radius:2px;overflow:hidden;opacity:0;animation:fadeIn .3s .6s forwards;}
+.splash-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#00d4ff,#8b5cf6);border-radius:2px;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+@keyframes fadeIn{to{opacity:1;}}
+
+/* CHALLENGE */
+.challenge-day{display:flex;flex-direction:column;align-items:center;gap:2px;padding:.35rem .2rem;border-radius:6px;font-size:.6rem;min-width:32px;}
+.challenge-day.ok{background:var(–green-dim);color:var(–green);}
+.challenge-day.fail{background:var(–red-dim);color:var(–red);}
+.challenge-day.future{background:var(–bg3);color:var(–muted);}
+
+/* AI SUMMARY */
+.ai-card{background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(0,212,255,.05));border:1px solid rgba(139,92,246,.2);border-radius:var(–radius);padding:1rem 1.1rem;margin-bottom:.85rem;}
+.ai-card-title{font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;color:var(–violet);font-weight:600;margin-bottom:.65rem;display:flex;align-items:center;gap:.4rem;}
+
+/* SIMULATOR */
+.sim-result-row{display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:.5px solid var(–border);font-size:.82rem;}
+.sim-result-row:last-child{border-bottom:none;font-weight:700;}
+.sim-result-val{font-family:‘JetBrains Mono’,monospace;font-weight:600;color:var(–cyan);}
+
+/* ICON PREVIEW */
+
+.fx-row{display:flex;align-items:center;gap:.75rem;padding:.6rem 0;border-bottom:.5px solid var(–border);}
+.fx-row:last-of-type{border-bottom:none;}
+.fx-flag{font-size:1.4rem;flex-shrink:0;}
+.fx-info{flex-shrink:0;min-width:80px;}
+.fx-name{font-size:.78rem;font-weight:700;}
+.fx-rate{font-size:.62rem;color:var(–muted2);font-family:‘JetBrains Mono’,monospace;}
+.fx-amounts{flex:1;text-align:right;}
+.fx-amt{font-size:.8rem;font-weight:700;font-family:‘JetBrains Mono’,monospace;}
+.fx-amt-sub{font-size:.62rem;color:var(–muted2);margin-top:1px;}
+
+/* ── PWA STEPS ── */
+.pwa-steps{display:flex;flex-direction:column;gap:.6rem;}
+.pwa-step{display:flex;align-items:flex-start;gap:.75rem;padding:.6rem .8rem;background:var(–bg2);border-radius:var(–radius-sm);}
+.pwa-num{width:22px;height:22px;border-radius:50%;background:var(–cyan);color:#000;font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.pwa-desc{font-size:.8rem;color:var(–text);line-height:1.5;}
+
+/* ── ANIM NUM ── */
+.anim-num{display:inline;transition:all .1s;}
+
+/* ── ALERTE FIN MOIS ── */
+.month-end-alert{border-radius:var(–radius-sm);padding:.7rem 1rem;margin-bottom:.5rem;font-size:.78rem;line-height:1.5;display:flex;align-items:flex-start;gap:.5rem;}
+
+/* ── OFFLINE ── */
+#offline-banner{
+position:fixed;top:0;left:0;right:0;z-index:800;
+background:var(–amber);color:#000;
+font-size:.75rem;font-weight:700;text-align:center;
+padding:6px 16px;transform:translateY(-100%);
+transition:transform .3s ease;
+}
+#offline-banner.show{transform:translateY(0);}
+.offline-status-row{display:flex;align-items:center;gap:.5rem;padding:.5rem 0;}
+
+/* ═══ TRIPS ═══ */
+#trip-banner{
+display:none;
+background:linear-gradient(135deg,rgba(0,212,255,.08),rgba(139,92,246,.06));
+border:1px solid rgba(0,212,255,.2);
+border-radius:var(–radius);padding:10px 14px;margin-bottom:8px;
+}
+.trip-banner-inner{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.trip-banner-emoji{font-size:1.5rem;flex-shrink:0;}
+.trip-banner-name{font-size:.84rem;font-weight:700;color:var(–cyan);}
+.trip-banner-meta{font-size:.68rem;color:var(–muted2);margin-top:1px;font-family:‘JetBrains Mono’,monospace;}
+.trip-banner-right{display:flex;gap:4px;align-items:center;flex-shrink:0;}
+.trip-banner-bar{height:3px;background:var(–bg3);border-radius:2px;overflow:hidden;margin-top:8px;}
+
+.trip-card{
+background:var(–bg1);border-radius:var(–radius);
+border:1px solid var(–border);overflow:hidden;
+}
+.trip-card-active{border-color:var(–cyan);box-shadow:0 0 0 1px rgba(0,212,255,.15);}
+.trip-card-header{
+display:flex;align-items:center;justify-content:space-between;
+padding:12px 14px;border-bottom:1px solid var(–border);gap:8px;flex-wrap:wrap;
+}
+.trip-emoji-big{font-size:1.8rem;flex-shrink:0;}
+.trip-card-name{font-size:.9rem;font-weight:700;letter-spacing:-.02em;}
+.trip-card-meta{font-size:.68rem;color:var(–muted2);margin-top:2px;font-family:‘JetBrains Mono’,monospace;}
+.trip-kpis{
+display:flex;flex-wrap:wrap;gap:0;
+border-bottom:1px solid var(–border);
+}
+.trip-kpi{
+flex:1;min-width:80px;padding:10px 14px;
+border-right:1px solid var(–border);
+}
+.trip-kpi:last-child{border-right:none;}
+.trip-kpi-label{font-size:.6rem;color:var(–muted2);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:3px;}
+.trip-kpi-val{font-size:.9rem;font-weight:800;font-family:‘JetBrains Mono’,monospace;}
+
+/* Saisie trip indicator */
+.trip-saisie-indicator{
+display:flex;align-items:center;gap:8px;
+padding:8px 14px;background:var(–cyan-dim);
+border-radius:var(–radius-sm);margin-bottom:8px;
+font-size:.75rem;color:var(–cyan);font-weight:600;
+}
+
+/* ═══ STANDING ORDERS ═══ */
+.so-card{
+background:var(–bg1);border-radius:var(–radius);
+border:1px solid var(–border);
+padding:13px 14px;margin-bottom:6px;
+display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+}
+.so-card-due{border-color:var(–amber);background:var(–amber-dim);}
+.so-card-left{display:flex;align-items:flex-start;gap:10px;flex:1;min-width:0;}
+.so-avatar{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.88rem;font-weight:700;flex-shrink:0;}
+.so-info{flex:1;min-width:0;}
+.so-name{font-size:.88rem;font-weight:700;margin-bottom:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.so-due-badge{font-size:.6rem;padding:2px 7px;border-radius:10px;background:var(–amber);color:#000;font-weight:800;}
+.so-meta{font-size:.68rem;color:var(–muted2);display:flex;flex-wrap:wrap;gap:4px;margin-bottom:3px;}
+.so-next{font-size:.65rem;color:var(–muted2);font-family:‘JetBrains Mono’,monospace;}
+.so-card-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;}
+.so-amount{font-size:1rem;font-weight:800;font-family:‘JetBrains Mono’,monospace;}
+.so-actions{display:flex;align-items:center;gap:4px;}
+
+/* SO toggle smaller */
+.so-actions .toggle{width:36px;height:20px;border-radius:10px;}
+.so-actions .toggle::after{width:16px;height:16px;top:2px;left:2px;}
+.so-actions .toggle.on::after{transform:translateX(16px);}
+
+/* ═══ BALANCE WIDGET ═══ */
+.bal-widget{padding:16px;}
+.bal-main{text-align:center;margin-bottom:14px;}
+.bal-label{font-size:.62rem;font-weight:700;color:var(–muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
+.bal-amount{font-size:2.8rem;font-weight:900;letter-spacing:-.06em;line-height:1;font-family:‘JetBrains Mono’,monospace;}
+.bal-currency{font-size:1rem;font-weight:600;color:var(–muted2);margin-left:4px;vertical-align:middle;}
+.bal-sub{font-size:.72rem;color:var(–muted2);margin-top:4px;}
+.bal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px;}
+.bal-stat{background:var(–bg2);border-radius:8px;padding:8px 6px;text-align:center;}
+.bal-stat-label{font-size:.58rem;color:var(–muted2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:3px;}
+.bal-stat-val{font-size:.82rem;font-weight:800;font-family:‘JetBrains Mono’,monospace;}
+.bal-bar-wrap{margin-top:4px;}
+.bal-bar-track{height:6px;background:var(–bg3);border-radius:3px;overflow:hidden;position:relative;margin-bottom:5px;}
+.bal-bar-fill{height:6px;border-radius:3px;transition:width .7s cubic-bezier(.23,1,.32,1);}
+.bal-bar-proj{position:absolute;top:0;left:0;height:6px;border-radius:3px;background:var(–red);opacity:.3;}
+.bal-bar-labels{display:flex;justify-content:space-between;font-size:.62rem;color:var(–muted2);}
+
+/* ═══ FISCAL ═══ */
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(–border);font-size:.86rem;}
+.stat-row:last-child{border-bottom:none;}
+.stat-label{color:var(–ink2);}
+.stat-val{font-weight:700;font-family:‘JetBrains Mono’,monospace;}
+
+/* ═══ SWISS FEATURES ═══ */
+.p3-card{background:linear-gradient(135deg,rgba(0,229,160,.07),rgba(0,212,255,.04));border:1px solid rgba(0,229,160,.2);border-radius:var(–radius-lg);padding:16px;margin-bottom:.85rem;}
+.lpp-result{background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(0,212,255,.05));border:1px solid rgba(139,92,246,.2);border-radius:var(–radius-lg);padding:16px;text-align:center;margin-bottom:.85rem;}
+.ch-bank-card{background:var(–bg1);border-radius:var(–radius-lg);overflow:hidden;border:1px solid var(–border);margin-bottom:.75rem;}
+
+/* ═══ RESPONSIVE — BULLETPROOF ═══ */
+
+/* MOBILE — force hide desktop elements */
+
+/* MOBILE ONLY — max 767px */
+@media screen and (max-width: 767px) {
+.sidebar    { display: none !important; }
+.topbar     { display: none !important; }
+.mob-header { display: flex !important; }
+.tab-bar    { display: flex !important; }
+.page { padding: 12px 12px calc(var(–tab-h) + var(–safe-bot) + 16px) !important; }
+.g4 { grid-template-columns: 1fr 1fr !important; }
+.g2 { grid-template-columns: 1fr !important; }
+.form-layout { grid-template-columns: 1fr !important; }
+.form-card { position: static !important; }
+.kpi-value { font-size: 1.2rem !important; }
+.bal-grid { grid-template-columns: 1fr 1fr !important; }
+}
+
+/* DESKTOP ONLY — min 768px */
+@media screen and (min-width: 768px) {
+.sidebar    { display: flex !important; }
+.topbar     { display: flex !important; }
+.mob-header { display: none !important; }
+.tab-bar    { display: none !important; }
+.page { padding: 20px 16px 80px !important; }
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(–border2); border-radius: 2px; }
+
+/* ═══ TRIPS ═══ */
+#trip-banner{
+display:none;
+background:linear-gradient(135deg,rgba(0,212,255,.08),rgba(139,92,246,.06));
+border:1px solid rgba(0,212,255,.2);
+border-radius:var(–radius);padding:10px 14px;margin-bottom:8px;
+}
+.trip-banner-inner{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.trip-banner-emoji{font-size:1.5rem;flex-shrink:0;}
+.trip-banner-name{font-size:.84rem;font-weight:700;color:var(–cyan);}
+.trip-banner-meta{font-size:.68rem;color:var(–muted2);margin-top:1px;font-family:‘JetBrains Mono’,monospace;}
+.trip-banner-right{display:flex;gap:4px;align-items:center;flex-shrink:0;}
+.trip-banner-bar{height:3px;background:var(–bg3);border-radius:2px;overflow:hidden;margin-top:8px;}
+
+.trip-card{
+background:var(–bg1);border-radius:var(–radius);
+border:1px solid var(–border);overflow:hidden;
+}
+.trip-card-active{border-color:var(–cyan);box-shadow:0 0 0 1px rgba(0,212,255,.15);}
+.trip-card-header{
+display:flex;align-items:center;justify-content:space-between;
+padding:12px 14px;border-bottom:1px solid var(–border);gap:8px;flex-wrap:wrap;
+}
+.trip-emoji-big{font-size:1.8rem;flex-shrink:0;}
+.trip-card-name{font-size:.9rem;font-weight:700;letter-spacing:-.02em;}
+.trip-card-meta{font-size:.68rem;color:var(–muted2);margin-top:2px;font-family:‘JetBrains Mono’,monospace;}
+.trip-kpis{
+display:flex;flex-wrap:wrap;gap:0;
+border-bottom:1px solid var(–border);
+}
+.trip-kpi{
+flex:1;min-width:80px;padding:10px 14px;
+border-right:1px solid var(–border);
+}
+.trip-kpi:last-child{border-right:none;}
+.trip-kpi-label{font-size:.6rem;color:var(–muted2);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:3px;}
+.trip-kpi-val{font-size:.9rem;font-weight:800;font-family:‘JetBrains Mono’,monospace;}
+
+/* Saisie trip indicator */
+.trip-saisie-indicator{
+display:flex;align-items:center;gap:8px;
+padding:8px 14px;background:var(–cyan-dim);
+border-radius:var(–radius-sm);margin-bottom:8px;
+font-size:.75rem;color:var(–cyan);font-weight:600;
+}
+
+/* ═══ STANDING ORDERS ═══ */
+.so-card{
+background:var(–bg1);border-radius:var(–radius);
+border:1px solid var(–border);
+padding:13px 14px;margin-bottom:6px;
+display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+}
+.so-card-due{border-color:var(–amber);background:var(–amber-dim);}
+.so-card-left{display:flex;align-items:flex-start;gap:10px;flex:1;min-width:0;}
+.so-avatar{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.88rem;font-weight:700;flex-shrink:0;}
+.so-info{flex:1;min-width:0;}
+.so-name{font-size:.88rem;font-weight:700;margin-bottom:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.so-due-badge{font-size:.6rem;padding:2px 7px;border-radius:10px;background:var(–amber);color:#000;font-weight:800;}
+.so-meta{font-size:.68rem;color:var(–muted2);display:flex;flex-wrap:wrap;gap:4px;margin-bottom:3px;}
+.so-next{font-size:.65rem;color:var(–muted2);font-family:‘JetBrains Mono’,monospace;}
+.so-card-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;}
+.so-amount{font-size:1rem;font-weight:800;font-family:‘JetBrains Mono’,monospace;}
+.so-actions{display:flex;align-items:center;gap:4px;}
+
+/* SO toggle smaller */
+.so-actions .toggle{width:36px;height:20px;border-radius:10px;}
+.so-actions .toggle::after{width:16px;height:16px;top:2px;left:2px;}
+.so-actions .toggle.on::after{transform:translateX(16px);}
+
+/* ═══ BALANCE WIDGET ═══ */
+.bal-widget{padding:16px;}
+.bal-main{text-align:center;margin-bottom:14px;}
+.bal-label{font-size:.62rem;font-weight:700;color:var(–muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
+.bal-amount{font-size:2.8rem;font-weight:900;letter-spacing:-.06em;line-height:1;font-family:‘JetBrains Mono’,monospace;}
+.bal-currency{font-size:1rem;font-weight:600;color:var(–muted2);margin-left:4px;vertical-align:middle;}
+.bal-sub{font-size:.72rem;color:var(–muted2);margin-top:4px;}
+.bal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px;}
+.bal-stat{background:var(–bg2);border-radius:8px;padding:8px 6px;text-align:center;}
+.bal-stat-label{font-size:.58rem;color:var(–muted2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:3px;}
+.bal-stat-val{font-size:.82rem;font-weight:800;font-family:‘JetBrains Mono’,monospace;}
+.bal-bar-wrap{margin-top:4px;}
+.bal-bar-track{height:6px;background:var(–bg3);border-radius:3px;overflow:hidden;position:relative;margin-bottom:5px;}
+.bal-bar-fill{height:6px;border-radius:3px;transition:width .7s cubic-bezier(.23,1,.32,1);}
+.bal-bar-proj{position:absolute;top:0;left:0;height:6px;border-radius:3px;background:var(–red);opacity:.3;}
+.bal-bar-labels{display:flex;justify-content:space-between;font-size:.62rem;color:var(–muted2);}
+
+/* ═══ FISCAL ═══ */
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(–border);font-size:.86rem;}
+.stat-row:last-child{border-bottom:none;}
+.stat-label{color:var(–ink2);}
+.stat-val{font-weight:700;font-family:‘JetBrains Mono’,monospace;}
+
+/* ═══ SWISS FEATURES ═══ */
+.p3-card{background:linear-gradient(135deg,rgba(0,229,160,.07),rgba(0,212,255,.04));border:1px solid rgba(0,229,160,.2);border-radius:var(–radius-lg);padding:16px;margin-bottom:.85rem;}
+.lpp-result{background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(0,212,255,.05));border:1px solid rgba(139,92,246,.2);border-radius:var(–radius-lg);padding:16px;text-align:center;margin-bottom:.85rem;}
+.ch-bank-card{background:var(–bg1);border-radius:var(–radius-lg);overflow:hidden;border:1px solid var(–border);margin-bottom:.75rem;}
+
+/* ═══ PACE SVG ICONS ═══ */
+.nav-icon svg, .tab-icon svg, .settings-icon svg,
+.mob-add svg, .btn svg, [class*=“icon”] svg {
+display: inline-block;
+vertical-align: middle;
+flex-shrink: 0;
+fill: none;
+stroke: currentColor;
+}
+.tab-item svg { color: var(–muted2); }
+.tab-item.active svg { color: var(–accent); }
+.nav-icon { display: flex; align-items: center; justify-content: center; }
+.nav-item svg { width: 1rem; height: 1rem; }
+
+</style></head><body>
+<div class="header">
+<div>
+<h1>PACE</h1>
+<div class="sub">R\u00e9capitulatif mensuel • ${MF[mi]} • G\u00e9n\u00e9r\u00e9 le ${new Date().toLocaleDateString(‘fr-CH’)}</div>
+</div>
+<div style="text-align:right;">
+<div style="font-size:28px;font-weight:800;color:${score>=80?'#00e5a0':score>=60?'#ffb020':'#ff4d6a'};">${score}/100</div>
+<div class="sub">Score financier</div>
+</div>
+</div>
+<div class="kpis">
+<div class="kpi"><div class="kpi-label">Revenu</div><div class="kpi-value cyan">${F(rev)} CHF</div></div>
+<div class="kpi"><div class="kpi-label">Budget</div><div class="kpi-value" style="color:#8b5cf6">${F(bud)} CHF</div></div>
+<div class="kpi"><div class="kpi-label">D\u00e9pens\u00e9</div><div class="kpi-value amber">${F(sp)} CHF</div></div>
+<div class="kpi"><div class="kpi-label">\u00c9pargne</div><div class="kpi-value ${net>=0?'green':'red'}">${net>=0?’+’:’’}${F(net)} CHF</div></div>
+</div>
+${getEarnedBadges().length > 0 ? `<h2>Badges du mois</h2><div class="badge-row">${getEarnedBadges().slice(0,8).map(b=>`<div class="badge">${b.icon} ${b.name}</div>`).join('')}</div>` : ‘’}
+<h2>D\u00e9penses par cat\u00e9gorie</h2>
+<div class="cats">
+${topCats.map(x=>{const b=budC(mi,x.c),pct=b>0?Math.min(100,x.v/b*100):100;const col=pct>90?’#ff4d6a’:pct>70?’#ffb020’:’#00e5a0’;return`<div class="cat-row"><div class="cat-name">${x.c}</div><div class="cat-bar"><div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${col};"></div></div></div><div class="cat-amt">${F(x.v)} CHF</div></div>`}).join(’’)}
+</div>
+<h2>D\u00e9tail des transactions (${allExp.length})</h2>
+<table>
+<thead><tr><th>Date</th><th>Description</th><th>Cat\u00e9gorie</th><th class="r">Montant</th></tr></thead>
+<tbody>${allExp.map(e=>`<tr><td>${e.date||'—'}</td><td>${e.desc||e.cat}</td><td>${e.cat}</td><td class="r amber">${FD(e.amount)} CHF</td></tr>`).join(’’)}</tbody>
+<tfoot><tr><td colspan="3" style="font-weight:700;">Total</td><td class="r" style="font-weight:700;color:#ff4d6a;">${FD(sp)} CHF</td></tr></tfoot>
+</table>
+<div class="footer">
+<span>PACE v10 • ${MF[mi]}</span>
+<span>Streak actuel : ${streak.current} jours • Record : ${streak.best} jours</span>
+</div>
+</body></html>`;
+
+```
+const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = 'BudgetPACE_' + (MF[mi]||'').replace(' ','_') + '.html';
+a.click();
+URL.revokeObjectURL(url);
+showFB('\u2713 PDF g\u00e9n\u00e9r\u00e9 !', 'var(--green)');
+```
+
+} catch(e) {
+alert(’Erreur : ’ + e.message);
+}
+if (btn) { btn.disabled = false; btn.innerHTML = ‘📄 G\u00e9n\u00e9rer le PDF’; }
+}
+
+function convertFX() {
+const amt = parseFloat(document.getElementById(‘fx-amount’)?.value) || 0;
+const el = document.getElementById(‘fx-convert-result’);
+if (!el) return;
+if (!amt) { el.innerHTML = ‘’; return; }
+const currencies = [{ code: ‘EUR’, symbol: ‘€’, flag: ‘🇪🇺’ }, { code: ‘USD’, symbol: ‘$’, flag: ‘🇺🇸’ }, { code: ‘GBP’, symbol: ‘£’, flag: ‘🇬🇧’ }];
+el.innerHTML = currencies.map(cur => {
+const rate = FX_RATES[cur.code] || 0;
+if (!rate) return ‘’;
+return `<div style="display:flex;justify-content:space-between;padding:.4rem .5rem;background:var(--bg2);border-radius:6px;font-size:.8rem;"> <span>${cur.flag} ${cur.code}</span> <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--cyan)">${cur.symbol}${(amt * rate).toLocaleString('fr-CH', {minimumFractionDigits:2,maximumFractionDigits:2})}</span> </div>`;
+}).join(’’);
+}
+
+// ═══════════ 1. MICRO-ANIMATIONS CHIFFRES ═══════════
+function animateNumber(el, from, to, duration = 800, decimals = 0, suffix = ‘’) {
+if (!el) return;
+const start = performance.now();
+const diff = to - from;
+function step(now) {
+const elapsed = Math.min((now - start) / duration, 1);
+const ease = 1 - Math.pow(1 - elapsed, 3); // ease-out cubic
+const val = from + diff * ease;
+const fmt = decimals > 0 ? val.toFixed(decimals) : Math.round(val).toLocaleString(‘fr-CH’);
+el.textContent = fmt + suffix;
+if (elapsed < 1) requestAnimationFrame(step);
+else el.textContent = decimals > 0 ? to.toFixed(decimals) : to.toLocaleString(‘fr-CH’) + suffix;
+}
+requestAnimationFrame(step);
+}
+
+function animateKPIs() {
+const mi = CUR;
+const rev = revM(mi), sp = expT(mi), net = rev - sp, bud = budM(mi);
+const revEl = document.querySelector(’#kpi-rev’);
+const spEl = document.querySelector(’#kpi-spent’);
+const budEl = document.querySelector(’#kpi-budget’);
+const netEl = document.querySelector(’#kpi-net’);
+if (revEl) { revEl.innerHTML = ‘<span class="anim-num">—</span><span>CHF</span>’; animateNumber(revEl.querySelector(’.anim-num’), 0, rev, 900); }
+if (spEl)  { spEl.innerHTML  = ‘<span class="anim-num">—</span><span>CHF</span>’; animateNumber(spEl.querySelector(’.anim-num’),  0, sp,  750); }
+if (budEl) { budEl.innerHTML = ‘<span class="anim-num">—</span><span>CHF</span>’; animateNumber(budEl.querySelector(’.anim-num’), 0, bud, 700); }
+if (netEl) {
+netEl.innerHTML = ‘<span class="anim-num">—</span><span>CHF</span>’;
+animateNumber(netEl.querySelector(’.anim-num’), 0, Math.abs(net), 850);
+netEl.style.color = net >= 0 ? ‘var(–green)’ : ‘var(–red)’;
+}
+}
+
+// ═══════════ 2. PACEX DE CHANGE EN TEMPS RÉEL ═══════════
+let FX_RATES = { EUR: 0.93, USD: 1.09, GBP: 0.79 };
+let FX_LOADED = false;
+let FX_LAST_FETCH = 0;
+
+async function fetchFXRates() {
+const now = Date.now();
+if (FX_LOADED && now - FX_LAST_FETCH < 3600000) return; // cache 1h
+try {
+const r = await fetch(‘https://api.frankfurter.app/latest?from=CHF&to=EUR,USD,GBP’);
+if (!r.ok) throw new Error(’HTTP ’ + r.status);
+const data = await r.json();
+if (data.rates) {
+FX_RATES = data.rates;
+FX_LOADED = true;
+FX_LAST_FETCH = now;
+localStorage.setItem(‘pace_fx’, JSON.stringify({ rates: FX_RATES, ts: now }));
+}
+} catch (e) {
+const cached = localStorage.getItem(‘pace_fx’);
+if (cached) { const d = JSON.parse(cached); FX_RATES = d.rates; FX_LOADED = true; }
+}
+renderFX();
+}
+
+function renderFX() {
+const el = document.getElementById(‘fx-content’);
+if (!el) return;
+const mi = CUR;
+const rev = revM(mi), sp = expT(mi), net = rev - sp;
+const currencies = [
+{ code: ‘EUR’, symbol: ‘€’, flag: ‘🇪🇺’ },
+{ code: ‘USD’, symbol: ‘$’, flag: ‘🇺🇸’ },
+{ code: ‘GBP’, symbol: ‘£’, flag: ‘🇬🇧’ },
+];
+const ts = FX_LAST_FETCH ? new Date(FX_LAST_FETCH).toLocaleTimeString(‘fr-CH’, { hour: ‘2-digit’, minute: ‘2-digit’ }) : ‘cache’;
+el.innerHTML = `<div style="font-size:.62rem;color:var(--muted2);margin-bottom:.75rem;font-family:'JetBrains Mono',monospace;">Mis à jour : ${ts} · 1 CHF = …</div> ${currencies.map(cur => { const rate = FX_RATES[cur.code] || 0; if (!rate) return ''; return`<div class="fx-row">
+<div class="fx-flag">${cur.flag}</div>
+<div class="fx-info">
+<div class="fx-name">${cur.code}</div>
+<div class="fx-rate">1 CHF = ${rate.toFixed(4)} ${cur.code}</div>
+</div>
+<div class="fx-amounts">
+<div class="fx-amt" style="color:var(--cyan)">Net : ${cur.symbol}${Math.round(net * rate).toLocaleString(‘fr-CH’)}</div>
+<div class="fx-amt-sub">Rev : ${cur.symbol}${Math.round(rev * rate).toLocaleString(‘fr-CH’)} · Dep : ${cur.symbol}${Math.round(sp * rate).toLocaleString(‘fr-CH’)}</div>
+</div>
+</div>`; }).join('')} <button class="btn btn-ghost btn-sm" style="margin-top:.75rem;width:100%;justify-content:center;" onclick="fetchFXRates()">↻ Actualiser les taux</button>`;
+}
+
+// ═══════════ 3. SUIVI PATRIMOINE NET ═══════════
+function savePatrimoine() {
+const actifs = [
+{ id: ‘pat-cash’, label: ‘Liquidités (banque/cash)’ },
+{ id: ‘pat-invest’, label: ‘Investissements / actions’ },
+{ id: ‘pat-immo’, label: ‘Immobilier (valeur)’ },
+{ id: ‘pat-autres-a’, label: ‘Autres actifs’ },
+];
+const passifs = [
+{ id: ‘pat-hypotheque’, label: ‘Hypothèque’ },
+{ id: ‘pat-credit’, label: ‘Crédits en cours’ },
+{ id: ‘pat-autres-p’, label: ‘Autres dettes’ },
+];
+const data = {};
+[…actifs, …passifs].forEach(f => {
+const el = document.getElementById(f.id);
+data[f.id] = el ? (parseFloat(el.value) || 0) : 0;
+});
+localStorage.setItem(‘pace_patrimoine’, JSON.stringify(data));
+renderPatrimoine();
+haptic(‘success’);
+showFB(‘Patrimoine enregistré !’, ‘var(–green)’);
+}
+
+function renderPatrimoine() {
+const el = document.getElementById(‘patrimoine-content’);
+if (!el) return;
+const data = JSON.parse(localStorage.getItem(‘pace_patrimoine’) || ‘{}’);
+const totalActifs = (data[‘pat-cash’] || 0) + (data[‘pat-invest’] || 0) + (data[‘pat-immo’] || 0) + (data[‘pat-autres-a’] || 0);
+const totalPassifs = (data[‘pat-hypotheque’] || 0) + (data[‘pat-credit’] || 0) + (data[‘pat-autres-p’] || 0);
+const net = totalActifs - totalPassifs;
+el.innerHTML = ` <div class="g2" style="margin-bottom:.85rem;"> <div class="kpi-card"><div class="kpi-top"><div class="kpi-label">Total actifs</div></div><div class="kpi-value" style="color:var(--green)">${F(totalActifs)}<span>CHF</span></div></div> <div class="kpi-card"><div class="kpi-top"><div class="kpi-label">Total passifs</div></div><div class="kpi-value" style="color:var(--red)">${F(totalPassifs)}<span>CHF</span></div></div> </div> <div class="card" style="margin-bottom:.85rem;padding:1rem 1.1rem;background:${net>=0?'linear-gradient(135deg,rgba(0,229,160,.08),rgba(0,212,255,.05))':'linear-gradient(135deg,rgba(255,77,106,.08),rgba(255,176,32,.05))'};border:1px solid ${net>=0?'rgba(0,229,160,.2)':'rgba(255,77,106,.2)'};"> <div style="font-size:.6rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;">Patrimoine net</div> <div style="font-size:2rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:${net>=0?'var(--green)':'var(--red)'}">${net>=0?'+':''}${F(net)} CHF</div> </div> <div class="section-label">Actifs</div> <div class="input-group"> ${[['pat-cash','💰 Liquidités',(data['pat-cash']||'')],['pat-invest','📈 Investissements',(data['pat-invest']||'')],['pat-immo','🏠 Immobilier',(data['pat-immo']||'')],['pat-autres-a','📦 Autres actifs',(data['pat-autres-a']||'')]].map(([id,label,val])=>`
+<div class="fgroup"><label class="flabel">${label} (CHF)</label><input type="number" id="${id}" class="finput" placeholder="0" value="${val}"></div>`).join('')} </div> <div class="section-label">Passifs / Dettes</div> <div class="input-group"> ${[['pat-hypotheque','🏦 Hypothèque',(data['pat-hypotheque']||'')],['pat-credit','💳 Crédits en cours',(data['pat-credit']||'')],['pat-autres-p','📋 Autres dettes',(data['pat-autres-p']||'')]].map(([id,label,val])=>`
+<div class="fgroup"><label class="flabel">${label} (CHF)</label><input type="number" id="${id}" class="finput" placeholder="0" value="${val}"></div>`).join('')} </div> <button class="btn btn-cyan" style="width:100%;justify-content:center;margin-top:.5rem;" onclick="savePatrimoine()">💾 Enregistrer</button>`;
+}
+
+// ═══════════ 4. RÉPARTITION FIXES/VARIABLES/PLAISIR ═══════════
+const CAT_TYPES = {
+fixed:    [‘Logement’,‘Assurances’,‘Impôts’,‘Abonnements’,‘Dettes’],
+variable: [‘Alimentation’,‘Transport’,‘Santé/Beauté’],
+pleasure: [‘Loisirs’,‘Voyage’],
+};
+
+function renderRepartition() {
+const el = document.getElementById(‘repartition-content’);
+if (!el) return;
+const mi = CUR;
+let fixed = 0, variable = 0, pleasure = 0, other = 0;
+EXP.filter(e => e.month === mi).forEach(e => {
+if (CAT_TYPES.fixed.includes(e.cat)) fixed += e.amount;
+else if (CAT_TYPES.variable.includes(e.cat)) variable += e.amount;
+else if (CAT_TYPES.pleasure.includes(e.cat)) pleasure += e.amount;
+else other += e.amount;
+});
+const total = fixed + variable + pleasure + other;
+const rev = revM(mi);
+const pct = v => total > 0 ? Math.round(v / total * 100) : 0;
+const pctRev = v => rev > 0 ? Math.round(v / rev * 100) : 0;
+const types = [
+{ label: ‘Charges fixes’, val: fixed, color: ‘var(–violet)’, icon: ‘🔒’, tip: ‘Loyer, assurances, abonnements…’ },
+{ label: ‘Dépenses variables’, val: variable, color: ‘var(–cyan)’, icon: ‘📊’, tip: ‘Alimentation, transport, santé…’ },
+{ label: ‘Plaisir & loisirs’, val: pleasure, color: ‘var(–amber)’, icon: ‘🎉’, tip: ‘Loisirs, voyages…’ },
+{ label: ‘Autre’, val: other, color: ‘var(–muted)’, icon: ‘📦’, tip: ‘Catégories non classées’ },
+].filter(t => t.val > 0);
+
+// 50/30/20 rule comparison
+const rule5020 = [
+{ label: ‘Besoins (50%)’, target: rev * 0.5, actual: fixed + variable, color: ‘var(–cyan)’ },
+{ label: ‘Plaisir (30%)’, target: rev * 0.3, actual: pleasure, color: ‘var(–amber)’ },
+{ label: ‘Épargne (20%)’, target: rev * 0.2, actual: Math.max(0, rev - total), color: ‘var(–green)’ },
+];
+
+el.innerHTML = `<div class="card" style="margin-bottom:.85rem;"> <div class="card-head"><div class="card-title">Ce mois · ${MF[mi]}</div></div> <div style="padding:.75rem 1.1rem .85rem;"> ${types.map(t =>`
+<div style="margin-bottom:.65rem;">
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.3rem;">
+<span style="font-size:.8rem;font-weight:600;">${t.icon} ${t.label}</span>
+<span style="font-size:.78rem;font-family:'JetBrains Mono',monospace;color:${t.color};font-weight:700;">${F(t.val)} CHF <span style="font-size:.65rem;color:var(--muted2)">(${pct(t.val)}%)</span></span>
+</div>
+<div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;">
+<div style="height:4px;width:${pct(t.val)}%;background:${t.color};border-radius:2px;transition:width .7s cubic-bezier(.23,1,.32,1);"></div>
+</div>
+<div style="font-size:.6rem;color:var(--muted2);margin-top:2px;">${t.tip} · ${pctRev(t.val)}% du revenu</div>
+</div>`).join('')} </div> </div> <div class="card" style="margin-bottom:.85rem;"> <div class="card-head"><div class="card-title">Règle 50/30/20</div></div> <div style="padding:.5rem 1.1rem .85rem;"> <div style="font-size:.7rem;color:var(--muted2);margin-bottom:.75rem;line-height:1.5;">La règle 50/30/20 recommande : 50% pour les besoins, 30% pour les désirs, 20% pour l'épargne.</div> ${rule5020.map(r => { const p = rev > 0 ? Math.min(100, Math.round(r.actual / r.target * 100)) : 0; const ok = r.actual <= r.target; return `<div style="margin-bottom:.7rem;">
+<div style="display:flex;justify-content:space-between;margin-bottom:.25rem;">
+<span style="font-size:.78rem;font-weight:600;">${r.label}</span>
+<span style="font-size:.72rem;font-family:'JetBrains Mono',monospace;color:${ok?'var(--green)':'var(--red)'};">${F(r.actual)} / ${F(r.target)} CHF</span>
+</div>
+<div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;">
+<div style="height:4px;width:${p}%;background:${ok?r.color:'var(--red)'};border-radius:2px;"></div>
+</div>
+</div>`; }).join('')} </div> </div> <div class="card"> <div class="card-head"><div class="card-title">Répartition visuelle</div></div> <div class="chart-box h200" style="padding:0 .75rem .75rem"><canvas id="chartRepartition"></canvas></div> </div>`;
+
+// Render donut
+setTimeout(() => {
+dc(‘repartition’);
+const canvas = document.getElementById(‘chartRepartition’);
+if (canvas && types.length > 0) {
+CHARTS[‘repartition’] = new Chart(canvas, {
+type: ‘doughnut’,
+data: {
+labels: types.map(t => t.label),
+datasets: [{ data: types.map(t => t.val), backgroundColor: types.map(t => t.color), borderWidth: 0, hoverOffset: 6 }]
+},
+options: { …SO, cutout: ‘65%’, plugins: { legend: { position: ‘right’, labels: { boxWidth: 8, font: { size: 10 }, color: ‘#6b7280’, padding: 8 } } } }
+});
+}
+}, 50);
+}
+
+// ═══════════ 5. ANALYSE EN LANGAGE NATUREL (IA) ═══════════
+async function generateNaturalAnalysis() {
+const mi = CUR;
+const rev = revM(mi), sp = expT(mi), net = rev - sp, bud = budM(mi);
+const topCats = AC.map(c => ({ c, v: expC(mi, c) })).filter(x => x.v > 0).sort((a, b) => b.v - a.v).slice(0, 5);
+const overCats = AC.filter(c => { const b = budC(mi, c); return b > 0 && expC(mi, c) > b; });
+const streak = calcStreak();
+const { score } = calcScore(mi);
+const savingsRate = rev > 0 ? Math.round(net / rev * 100) : 0;
+
+const prompt = `Tu es un coach financier bienveillant et direct. Génère une analyse courte (4-5 phrases) en français, en langage naturel et conversationnel (pas de bullet points, pas de titres). Tu t’adresses directement à l’utilisateur avec “tu”.
+
+Données du mois ${MF[mi]} :
+
+- Revenu : ${F(rev)} CHF | Dépensé : ${F(sp)} CHF | Épargne : ${F(net)} CHF (${savingsRate}%)
+- Budget planifié : ${F(bud)} CHF | Score : ${score}/100
+- Top dépenses : ${topCats.map(x => x.c + ’ ’ + F(x.v) + ’ CHF’).join(’, ’)}
+- Catégories dépassées : ${overCats.join(’, ’) || ‘aucune’}
+- Streak de saisie : ${streak.current} jours
+
+Commence par une observation directe sur le mois, puis mentionne le point fort ET le point à améliorer, et termine par un conseil concret et actionnable pour le mois prochain. Sois précis avec les chiffres. Pas plus de 5 phrases.`;
+
+const el = document.getElementById(‘natural-analysis-content’);
+const btn = document.getElementById(‘natural-analysis-btn’);
+if (!el) return;
+el.innerHTML = ‘<div style="color:var(--muted2);font-size:.78rem;animation:pulse 1s infinite;">🤖 Analyse en cours…</div>’;
+if (btn) { btn.disabled = true; btn.textContent = ‘Génération…’; }
+
+try {
+const resp = await fetch(‘https://api.anthropic.com/v1/messages’, {
+method: ‘POST’,
+headers: { ‘Content-Type’: ‘application/json’ },
+body: JSON.stringify({
+model: ‘claude-sonnet-4-20250514’,
+max_tokens: 350,
+messages: [{ role: ‘user’, content: prompt }]
+})
+});
+const data = await resp.json();
+const text = data.content?.find(b => b.type === ‘text’)?.text || ‘’;
+el.innerHTML = `<div style="font-size:.82rem;line-height:1.8;color:var(--text);">${text.replace(/\n/g, '<br>')}</div> <div style="font-size:.62rem;color:var(--muted);margin-top:.6rem;font-family:'JetBrains Mono',monospace;">Claude AI · ${MF[mi]}</div>`;
+} catch (e) {
+el.innerHTML = ‘<div style="color:var(--red);font-size:.75rem;">⚠️ Connexion impossible. Vérifie ta connexion.</div>’;
+}
+if (btn) { btn.disabled = false; btn.innerHTML = ‘🤖 Nouvelle analyse’; }
+}
+
+// ═══════════ 6. GUIDE INSTALLATION PWA ═══════════
+function showPWAGuide() {
+const el = document.getElementById(‘pwa-guide-content’);
+if (!el) return;
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isAndroid = /android/i.test(navigator.userAgent);
+const isInstalled = window.matchMedia(’(display-mode: standalone)’).matches;
+if (isInstalled) {
+el.innerHTML = `<div class="alert-success" style="margin-bottom:.75rem;">✅ L'app est déjà installée sur ton écran d'accueil !</div>`;
+return;
+}
+let steps = ‘’;
+if (isIOS) {
+steps = ` <div class="pwa-step"><div class="pwa-num">1</div><div class="pwa-desc">Ouvre PACE dans <strong>Safari</strong> (pas Chrome ni Firefox)</div></div> <div class="pwa-step"><div class="pwa-num">2</div><div class="pwa-desc">Appuie sur le bouton <strong>Partager</strong> <span style="font-size:1.1rem">⬆️</span> en bas de l'écran</div></div> <div class="pwa-step"><div class="pwa-num">3</div><div class="pwa-desc">Fais défiler et appuie sur <strong>"Sur l'écran d'accueil"</strong></div></div> <div class="pwa-step"><div class="pwa-num">4</div><div class="pwa-desc">Appuie sur <strong>"Ajouter"</strong> en haut à droite</div></div>`;
+} else if (isAndroid) {
+steps = ` <div class="pwa-step"><div class="pwa-num">1</div><div class="pwa-desc">Ouvre PACE dans <strong>Chrome</strong></div></div> <div class="pwa-step"><div class="pwa-num">2</div><div class="pwa-desc">Appuie sur les <strong>3 points</strong> ⋮ en haut à droite</div></div> <div class="pwa-step"><div class="pwa-num">3</div><div class="pwa-desc">Sélectionne <strong>"Ajouter à l'écran d'accueil"</strong></div></div> <div class="pwa-step"><div class="pwa-num">4</div><div class="pwa-desc">Confirme en appuyant sur <strong>"Ajouter"</strong></div></div>`;
+} else {
+steps = ` <div class="pwa-step"><div class="pwa-num">1</div><div class="pwa-desc">Sur <strong>iPhone</strong> : utilise Safari → Partager → Sur l'écran d'accueil</div></div> <div class="pwa-step"><div class="pwa-num">2</div><div class="pwa-desc">Sur <strong>Android</strong> : utilise Chrome → ⋮ → Ajouter à l'écran d'accueil</div></div>`;
+}
+el.innerHTML = ` <div class="alert-info" style="margin-bottom:.85rem;">📱 Installe l'app pour un accès instantané depuis ton écran d'accueil, sans navigateur.</div> <div class="pwa-steps">${steps}</div> <div style="margin-top:.85rem;padding:.75rem 1rem;background:var(--bg2);border-radius:var(--radius-sm);font-size:.72rem;color:var(--muted2);line-height:1.6;"> 💡 Une fois installée, l'app fonctionne <strong style="color:var(--cyan)">hors-ligne</strong> et se comporte comme une vraie app native. </div>`;
+}
+
+// ═══════════ 7. ALERTE FIN DE MOIS TENDUE ═══════════
+function checkEndOfMonthAlert() {
+const now = new Date();
+const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+const daysPassed = now.getDate();
+const daysLeft = daysInMonth - daysPassed;
+const mi = CUR;
+const sp = expT(mi), bud = budM(mi), rev = revM(mi);
+if (sp === 0 || daysPassed < 5) return null;
+const dailyRate = sp / daysPassed;
+const projected = sp + dailyRate * daysLeft;
+const projectedSavings = rev - projected;
+const alerts = [];
+if (projected > bud * 1.1) {
+alerts.push({ type: ‘danger’, msg: `⚠️ À ce rythme, tu vas dépasser ton budget de ${F(projected - bud)} CHF d'ici la fin du mois. Rythme actuel : ${F(dailyRate)} CHF/jour.` });
+} else if (projected > bud * 0.95) {
+alerts.push({ type: ‘warn’, msg: `🟡 Attention : tu approches de ton budget mensuel. Il te reste ${F(bud - sp)} CHF sur ${daysLeft} jours, soit ${F((bud - sp) / Math.max(1, daysLeft))} CHF/jour.` });
+}
+if (projectedSavings < 0 && rev > 0) {
+alerts.push({ type: ‘danger’, msg: `📉 Ton épargne projetée ce mois est négative (${F(projectedSavings)} CHF). Essaie de réduire tes dépenses variables.` });
+} else if (projectedSavings > 0 && projectedSavings < rev * 0.05 && rev > 0) {
+alerts.push({ type: ‘warn’, msg: `💡 Ton épargne projetée est faible ce mois (${F(projectedSavings)} CHF). Quelques jours restants pour optimiser.` });
+}
+return alerts;
+}
+
+// ═══════════ SERVICE WORKER ═══════════
+function registerSW() {
+if (!(‘serviceWorker’ in navigator)) return;
+// Inline SW as blob since we can’t write a separate file
+const swCode = ` const CACHE='paceapp-v17'; const ASSETS=['https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js']; self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>Promise.allSettled(ASSETS.map(u=>c.add(u).catch(()=>{}))).then(()=>self.skipWaiting())));}); self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));}); self.addEventListener('fetch',e=>{ if(e.request.url.includes('api.anthropic')||e.request.url.includes('frankfurter')||e.request.url.includes('qrserver')){ e.respondWith(fetch(e.request).catch(()=>new Response('',{status:503})));return; } if(e.request.method!=='GET'){return;} e.respondWith(caches.match(e.request).then(cached=>{ if(cached)return cached; return fetch(e.request).then(resp=>{ if(!resp||resp.status!==200||resp.type==='opaque')return resp; const clone=resp.clone(); caches.open(CACHE).then(c=>c.put(e.request,clone)); return resp; }).catch(()=>cached||new Response('Hors ligne',{status:503})); })); });`;
+const blob = new Blob([swCode], { type: ‘application/javascript’ });
+const swURL = URL.createObjectURL(blob);
+navigator.serviceWorker.register(swURL, { scope: ‘/’ })
+.then(reg => {
+console.log(‘SW registered’);
+localStorage.setItem(‘pace_sw’, ‘1’);
+updateOfflineStatus();
+})
+.catch(err => console.log(‘SW failed:’, err));
+}
+
+function updateOfflineStatus() {
+const el = document.getElementById(‘offline-status’);
+const swEl = document.getElementById(‘sw-toggle’);
+const online = navigator.onLine;
+const swActive = !!navigator.serviceWorker?.controller || localStorage.getItem(‘pace_sw’) === ‘1’;
+if (el) {
+el.textContent = !online ? ‘📴 Hors ligne — données locales’ : swActive ? ‘✅ Mode hors-ligne activé’ : ‘⚪ Mode hors-ligne désactivé’;
+el.style.color = !online ? ‘var(–red)’ : swActive ? ‘var(–green)’ : ‘var(–muted2)’;
+}
+if (swEl) swEl.classList.toggle(‘on’, swActive);
+}
+
+window.addEventListener(‘online’,  () => { updateOfflineStatus(); showFB(‘✅ Connexion rétablie’, ‘var(–green)’); });
+window.addEventListener(‘offline’, () => { updateOfflineStatus(); showFB(‘📴 Mode hors-ligne activé’, ‘var(–amber)’); });
+
+// ═══════════ NOTIFICATIONS INTELLIGENTES ═══════════
+async function requestSmartNotifications() {
+if (!(‘Notification’ in window)) { alert(‘Notifications non supportées’); return; }
+const perm = await Notification.requestPermission();
+if (perm !== ‘granted’) { showFB(‘Notifications refusées’, ‘var(–red)’); return; }
+localStorage.setItem(‘pace_smart_notif’, ‘1’);
+const swToggle = document.getElementById(‘smart-notif-toggle’);
+if (swToggle) swToggle.classList.add(‘on’);
+scheduleSmartNotifications();
+new Notification(‘PACE 🎯’, {
+body: ‘Notifications intelligentes activées ! Tu seras alerté si ton budget est menacé.’,
+tag: ‘paceapp-welcome’
+});
+showFB(‘Notifications activées !’, ‘var(–green)’);
+}
+
+function scheduleSmartNotifications() {
+if (localStorage.getItem(‘pace_smart_notif’) !== ‘1’) return;
+clearInterval(window._smartNotifTimer);
+window._smartNotifTimer = setInterval(() => {
+checkAndNotify();
+}, 3600000); // Check every hour
+checkAndNotify(); // Check immediately
+}
+
+function checkAndNotify() {
+if (!(‘Notification’ in window) || Notification.permission !== ‘granted’) return;
+if (localStorage.getItem(‘pace_smart_notif’) !== ‘1’) return;
+const mi = CUR;
+const sp = expT(mi), bud = budM(mi), rev = revM(mi);
+const now = new Date();
+const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+const daysPassed = now.getDate();
+const daysLeft = daysInMonth - daysPassed;
+const dailyRate = daysPassed > 0 ? sp / daysPassed : 0;
+const projected = sp + dailyRate * daysLeft;
+const lastNotif = parseInt(localStorage.getItem(‘pace_last_notif’) || ‘0’);
+const cooldown = 6 * 3600000; // 6h between notifications
+
+if (Date.now() - lastNotif < cooldown) return;
+
+let title = ‘’, body = ‘’, urgent = false;
+
+// Budget dépassé
+if (bud > 0 && sp > bud) {
+title = ‘⚠️ Budget dépassé !’;
+body = `Tu as dépassé ton budget de ${F(sp - bud)} CHF ce mois. (${F(sp)} / ${F(bud)} CHF)`;
+urgent = true;
+}
+// Budget va être dépassé
+else if (bud > 0 && projected > bud * 1.05 && daysLeft > 0) {
+title = ‘🟡 Budget bientôt dépassé’;
+body = `À ce rythme, tu dépasseras ton budget de ${F(Math.round(projected - bud))} CHF fin de mois.`;
+}
+// Pas de saisie depuis 3 jours
+else {
+const lastEntry = EXP.filter(e => e.date).map(e => e.date).sort().reverse()[0];
+if (lastEntry) {
+const daysSince = Math.floor((Date.now() - new Date(lastEntry + ‘T12:00:00’)) / 86400000);
+if (daysSince >= 3) {
+title = ‘📝 N'oublie pas de saisir’;
+body = `Aucune dépense depuis ${daysSince} jours. Tes données sont-elles à jour ?`;
+}
+}
+}
+
+if (title) {
+localStorage.setItem(‘pace_last_notif’, Date.now().toString());
+new Notification(title, { body, tag: ‘paceapp-alert’, icon: ‘’ });
+if (urgent) haptic(‘error’);
+}
+}
+
+// ═══════════ RAPPORT ANNUEL PDF ═══════════
+async function generateAnnualReport() {
+const btn = document.getElementById(‘annual-report-btn’);
+if (btn) { btn.disabled = true; btn.textContent = ‘Génération…’; }
+
+try {
+const allMonths = MF.map((mf, i) => ({
+i, label: mf, mc: MC[i],
+rev: revM(i), sp: expT(i), bud: budM(i),
+net: revM(i) - expT(i),
+cats: AC.map(c => ({ c, v: expC(i, c), b: budC(i, c) })).filter(x => x.v > 0 || x.b > 0)
+}));
+
+```
+const totalRev = allMonths.reduce((s, m) => s + m.rev, 0);
+const totalSp = allMonths.reduce((s, m) => s + m.sp, 0);
+const totalNet = totalRev - totalSp;
+const avgScore = Math.round(allMonths.filter(m => m.sp > 0).reduce((s, m) => s + calcScore(m.i).score, 0) / Math.max(1, allMonths.filter(m => m.sp > 0).length));
+const streak = calcStreak();
+const earned = getEarnedBadges();
+const xp = calcXP();
+const lv = getLevel(xp);
+const isDark = !document.body.classList.contains('light');
+
+const bg = '#0f1923', bg1 = '#111318', bg2 = '#181b21', bg3 = '#1e2329';
+const txt = '#f0f1f5', muted = '#6b7280', border = 'rgba(255,255,255,.06)';
+const cyan = '#00d4ff', green = '#00e5a0', red = '#ff4d6a', amber = '#ffb020', violet = '#8b5cf6';
+
+// Cat totals across all months
+const catTotals = {};
+AC.forEach(c => { catTotals[c] = allMonths.reduce((s, m) => s + expC(m.i, c), 0); });
+const topCats = Object.entries(catTotals).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+// Monthly data for chart (ASCII-style bar)
+const maxSp = Math.max(...allMonths.map(m => m.sp), 1);
+
+const html = `<!DOCTYPE html>
+```
+
+<html lang="fr"><head><meta charset="UTF-8">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+body{font-family:'Syne',Arial,sans-serif;background:${bg};color:${txt};padding:32px;font-size:13px;line-height:1.5;}
+h1{font-size:28px;font-weight:800;letter-spacing:-.04em;}
+h2{font-size:14px;font-weight:700;color:${cyan};text-transform:uppercase;letter-spacing:.1em;margin:28px 0 12px;padding-bottom:6px;border-bottom:1px solid ${border};}
+h3{font-size:12px;font-weight:600;color:${muted};text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px;}
+.header{border-bottom:2px solid ${cyan};padding-bottom:20px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:flex-end;}
+.header-left{}
+.header-sub{font-size:12px;color:${muted};margin-top:4px;font-family:'JetBrains Mono',monospace;}
+.header-right{text-align:right;}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.kpi{background:${bg1};border:1px solid ${border};border-radius:10px;padding:14px;}
+.kpi-l{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:${muted};margin-bottom:6px;}
+.kpi-v{font-size:20px;font-weight:800;font-family:'JetBrains Mono',monospace;}
+.kpi-s{font-size:10px;color:${muted};margin-top:3px;}
+table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:24px;}
+th{background:${bg2};padding:9px 10px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:${muted};border-bottom:1px solid ${border};}
+th.r,td.r{text-align:right;}
+td{padding:8px 10px;border-bottom:1px solid ${border};font-family:'JetBrains Mono',monospace;}
+tr:hover td{background:${bg2};}
+tfoot td{background:${bg2};font-weight:700;border-top:1px solid ${border};}
+.g{color:${green};} .r2{color:${red};} .c{color:${cyan};} .a{color:${amber};} .v{color:${violet};}
+.bar-bg{background:${bg2};height:6px;border-radius:3px;overflow:hidden;margin-top:4px;}
+.bar-fill{height:6px;border-radius:3px;}
+.cat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:24px;}
+.cat-item{background:${bg1};border:1px solid ${border};border-radius:8px;padding:10px 12px;}
+.cat-name{font-size:10px;font-weight:600;margin-bottom:6px;}
+.cat-val{font-size:14px;font-weight:800;font-family:'JetBrains Mono',monospace;}
+.cat-pct{font-size:9px;color:${muted};margin-top:2px;}
+.badges-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+.badge-chip{font-size:10px;padding:4px 10px;border-radius:12px;background:rgba(255,176,32,.12);color:${amber};border:1px solid rgba(255,176,32,.2);}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px;}
+.stat-card{background:${bg1};border:1px solid ${border};border-radius:8px;padding:12px;text-align:center;}
+.stat-num{font-size:22px;font-weight:800;font-family:'JetBrains Mono',monospace;line-height:1;}
+.stat-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:${muted};margin-top:4px;}
+.footer{margin-top:28px;padding-top:12px;border-top:1px solid ${border};font-size:9px;color:${muted};display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;}
+.net-bar{display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid ${border};}
+.nb-label{font-size:10px;font-weight:600;width:70px;flex-shrink:0;}
+.nb-bar-wrap{flex:1;background:${bg2};height:8px;border-radius:4px;overflow:hidden;}
+.nb-fill{height:8px;border-radius:4px;}
+.nb-val{font-size:10px;font-family:'JetBrains Mono',monospace;width:80px;text-align:right;flex-shrink:0;}
+
+/* ═══ TRIPS ═══ */
+#trip-banner{
+display:none;
+background:linear-gradient(135deg,rgba(0,212,255,.08),rgba(139,92,246,.06));
+border:1px solid rgba(0,212,255,.2);
+border-radius:var(–radius);padding:10px 14px;margin-bottom:8px;
+}
+.trip-banner-inner{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.trip-banner-emoji{font-size:1.5rem;flex-shrink:0;}
+.trip-banner-name{font-size:.84rem;font-weight:700;color:var(–cyan);}
+.trip-banner-meta{font-size:.68rem;color:var(–muted2);margin-top:1px;font-family:‘JetBrains Mono’,monospace;}
+.trip-banner-right{display:flex;gap:4px;align-items:center;flex-shrink:0;}
+.trip-banner-bar{height:3px;background:var(–bg3);border-radius:2px;overflow:hidden;margin-top:8px;}
+
+.trip-card{
+background:var(–bg1);border-radius:var(–radius);
+border:1px solid var(–border);overflow:hidden;
+}
+.trip-card-active{border-color:var(–cyan);box-shadow:0 0 0 1px rgba(0,212,255,.15);}
+.trip-card-header{
+display:flex;align-items:center;justify-content:space-between;
+padding:12px 14px;border-bottom:1px solid var(–border);gap:8px;flex-wrap:wrap;
+}
+.trip-emoji-big{font-size:1.8rem;flex-shrink:0;}
+.trip-card-name{font-size:.9rem;font-weight:700;letter-spacing:-.02em;}
+.trip-card-meta{font-size:.68rem;color:var(–muted2);margin-top:2px;font-family:‘JetBrains Mono’,monospace;}
+.trip-kpis{
+display:flex;flex-wrap:wrap;gap:0;
+border-bottom:1px solid var(–border);
+}
+.trip-kpi{
+flex:1;min-width:80px;padding:10px 14px;
+border-right:1px solid var(–border);
+}
+.trip-kpi:last-child{border-right:none;}
+.trip-kpi-label{font-size:.6rem;color:var(–muted2);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:3px;}
+.trip-kpi-val{font-size:.9rem;font-weight:800;font-family:‘JetBrains Mono’,monospace;}
+
+/* Saisie trip indicator */
+.trip-saisie-indicator{
+display:flex;align-items:center;gap:8px;
+padding:8px 14px;background:var(–cyan-dim);
+border-radius:var(–radius-sm);margin-bottom:8px;
+font-size:.75rem;color:var(–cyan);font-weight:600;
+}
+
+/* ═══ STANDING ORDERS ═══ */
+.so-card{
+background:var(–bg1);border-radius:var(–radius);
+border:1px solid var(–border);
+padding:13px 14px;margin-bottom:6px;
+display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+}
+.so-card-due{border-color:var(–amber);background:var(–amber-dim);}
+.so-card-left{display:flex;align-items:flex-start;gap:10px;flex:1;min-width:0;}
+.so-avatar{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.88rem;font-weight:700;flex-shrink:0;}
+.so-info{flex:1;min-width:0;}
+.so-name{font-size:.88rem;font-weight:700;margin-bottom:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.so-due-badge{font-size:.6rem;padding:2px 7px;border-radius:10px;background:var(–amber);color:#000;font-weight:800;}
+.so-meta{font-size:.68rem;color:var(–muted2);display:flex;flex-wrap:wrap;gap:4px;margin-bottom:3px;}
+.so-next{font-size:.65rem;color:var(–muted2);font-family:‘JetBrains Mono’,monospace;}
+.so-card-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;}
+.so-amount{font-size:1rem;font-weight:800;font-family:‘JetBrains Mono’,monospace;}
+.so-actions{display:flex;align-items:center;gap:4px;}
+
+/* SO toggle smaller */
+.so-actions .toggle{width:36px;height:20px;border-radius:10px;}
+.so-actions .toggle::after{width:16px;height:16px;top:2px;left:2px;}
+.so-actions .toggle.on::after{transform:translateX(16px);}
+
+/* ═══ BALANCE WIDGET ═══ */
+.bal-widget{padding:16px;}
+.bal-main{text-align:center;margin-bottom:14px;}
+.bal-label{font-size:.62rem;font-weight:700;color:var(–muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
+.bal-amount{font-size:2.8rem;font-weight:900;letter-spacing:-.06em;line-height:1;font-family:‘JetBrains Mono’,monospace;}
+.bal-currency{font-size:1rem;font-weight:600;color:var(–muted2);margin-left:4px;vertical-align:middle;}
+.bal-sub{font-size:.72rem;color:var(–muted2);margin-top:4px;}
+.bal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px;}
+.bal-stat{background:var(–bg2);border-radius:8px;padding:8px 6px;text-align:center;}
+.bal-stat-label{font-size:.58rem;color:var(–muted2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:3px;}
+.bal-stat-val{font-size:.82rem;font-weight:800;font-family:‘JetBrains Mono’,monospace;}
+.bal-bar-wrap{margin-top:4px;}
+.bal-bar-track{height:6px;background:var(–bg3);border-radius:3px;overflow:hidden;position:relative;margin-bottom:5px;}
+.bal-bar-fill{height:6px;border-radius:3px;transition:width .7s cubic-bezier(.23,1,.32,1);}
+.bal-bar-proj{position:absolute;top:0;left:0;height:6px;border-radius:3px;background:var(–red);opacity:.3;}
+.bal-bar-labels{display:flex;justify-content:space-between;font-size:.62rem;color:var(–muted2);}
+
+/* ═══ FISCAL ═══ */
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(–border);font-size:.86rem;}
+.stat-row:last-child{border-bottom:none;}
+.stat-label{color:var(–ink2);}
+.stat-val{font-weight:700;font-family:‘JetBrains Mono’,monospace;}
+
+/* ═══ SWISS FEATURES ═══ */
+.p3-card{background:linear-gradient(135deg,rgba(0,229,160,.07),rgba(0,212,255,.04));border:1px solid rgba(0,229,160,.2);border-radius:var(–radius-lg);padding:16px;margin-bottom:.85rem;}
+.lpp-result{background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(0,212,255,.05));border:1px solid rgba(139,92,246,.2);border-radius:var(–radius-lg);padding:16px;text-align:center;margin-bottom:.85rem;}
+.ch-bank-card{background:var(–bg1);border-radius:var(–radius-lg);overflow:hidden;border:1px solid var(–border);margin-bottom:.75rem;}
+</style></head><body>
+
+<div class="header">
+  <div class="header-left">
+    <div style="font-size:11px;color:${cyan};font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">Rapport annuel complet</div>
+    <h1>PACE</h1>
+    <div class="header-sub">Période : ${MF[0]} → ${MF[MF.length-1]} · Généré le ${new Date().toLocaleDateString('fr-CH')}</div>
+  </div>
+  <div class="header-right">
+    <div style="font-size:36px;font-weight:800;color:${avgScore >= 80 ? green : avgScore >= 60 ? amber : red};font-family:'JetBrains Mono',monospace;">${avgScore}</div>
+    <div style="font-size:9px;color:${muted};text-transform:uppercase;letter-spacing:.08em;">Score moyen</div>
+    <div style="font-size:12px;font-weight:700;margin-top:4px;color:${lv.color||cyan}">${lv.icon} ${lv.name}</div>
+  </div>
+</div>
+
+<div class="kpis">
+  <div class="kpi"><div class="kpi-l">Revenus totaux</div><div class="kpi-v c">${F(totalRev)}</div><div class="kpi-s">CHF sur toute la période</div></div>
+  <div class="kpi"><div class="kpi-l">Dépenses totales</div><div class="kpi-v a">${F(totalSp)}</div><div class="kpi-s">CHF sur toute la période</div></div>
+  <div class="kpi"><div class="kpi-l">Épargne totale</div><div class="kpi-v ${totalNet >= 0 ? 'g' : 'r2'}">${totalNet >= 0 ? '+' : ''}${F(totalNet)}</div><div class="kpi-s">CHF · ${totalRev > 0 ? Math.round(totalNet / totalRev * 100) : 0}% du revenu</div></div>
+  <div class="kpi"><div class="kpi-l">Taux d'épargne</div><div class="kpi-v ${totalRev > 0 && totalNet / totalRev >= 0.2 ? 'g' : 'a'}">${totalRev > 0 ? Math.round(totalNet / totalRev * 100) : 0}%</div><div class="kpi-s">Objectif : ≥ 20%</div></div>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="stat-num c">${EXP.length}</div><div class="stat-lbl">Dépenses saisies</div></div>
+  <div class="stat-card"><div class="stat-num a">${streak.best}</div><div class="stat-lbl">Record streak (jours)</div></div>
+  <div class="stat-card"><div class="stat-num v">${earned.length}</div><div class="stat-lbl">Badges obtenus</div></div>
+</div>
+
+<h2>Évolution mensuelle</h2>
+${allMonths.filter(m => m.sp > 0 || m.rev > 0).map(m => {
+  const spPct = Math.round(m.sp / maxSp * 100);
+  const revPct = Math.round(m.rev / maxSp * 100);
+  const netOk = m.net >= 0;
+  return `<div class="net-bar">
+    <div class="nb-label">${m.mc}</div>
+    <div class="nb-bar-wrap"><div class="nb-fill" style="width:${spPct}%;background:${netOk ? green : red};"></div></div>
+    <div class="nb-val" style="color:${netOk ? green : red}">${netOk ? '+' : ''}${F(m.net)}</div>
+  </div>`;
+}).join('')}
+
+<h2>Tableau mensuel détaillé</h2>
+<table>
+  <thead><tr><th>Mois</th><th class="r">Revenu</th><th class="r">Budget</th><th class="r">Dépensé</th><th class="r">Épargne</th><th class="r">Taux</th><th class="r">Score</th></tr></thead>
+  <tbody>
+    ${allMonths.map(m => {
+      const {score} = calcScore(m.i);
+      const rate = m.rev > 0 ? Math.round(m.net / m.rev * 100) : 0;
+      const ok = m.net >= 0;
+      return `<tr>
+        <td style="color:${txt};font-family:'Syne',sans-serif;font-weight:600">${m.mc}</td>
+        <td class="r c">${m.rev > 0 ? F(m.rev) : '—'}</td>
+        <td class="r v">${m.bud > 0 ? F(m.bud) : '—'}</td>
+        <td class="r a">${m.sp > 0 ? F(m.sp) : '—'}</td>
+        <td class="r ${ok ? 'g' : 'r2'}">${m.sp > 0 || m.rev > 0 ? (ok ? '+' : '') + F(m.net) : '—'}</td>
+        <td class="r ${rate >= 20 ? 'g' : rate >= 0 ? 'a' : 'r2'}">${m.sp > 0 ? rate + '%' : '—'}</td>
+        <td class="r ${score >= 80 ? 'g' : score >= 60 ? 'a' : 'r2'}">${m.sp > 0 ? score + '/100' : '—'}</td>
+      </tr>`;
+    }).join('')}
+  </tbody>
+  <tfoot><tr>
+    <td style="font-family:'Syne',sans-serif">TOTAL</td>
+    <td class="r c">${F(totalRev)}</td>
+    <td class="r">—</td>
+    <td class="r a">${F(totalSp)}</td>
+    <td class="r ${totalNet >= 0 ? 'g' : 'r2'}">${totalNet >= 0 ? '+' : ''}${F(totalNet)}</td>
+    <td class="r ${totalRev > 0 && totalNet / totalRev >= 0.2 ? 'g' : 'a'}">${totalRev > 0 ? Math.round(totalNet / totalRev * 100) + '%' : '—'}</td>
+    <td class="r">${avgScore}/100</td>
+  </tr></tfoot>
+</table>
+
+<h2>Dépenses par catégorie (toute la période)</h2>
+<div class="cat-grid">
+  ${topCats.map(([cat, val]) => {
+    const pct = totalSp > 0 ? Math.round(val / totalSp * 100) : 0;
+    const color = cc(cat);
+    return `<div class="cat-item">
+      <div class="cat-name" style="color:${color}">${cat}</div>
+      <div class="cat-val" style="color:${color}">${F(val)} CHF</div>
+      <div class="cat-pct">${pct}% des dépenses totales</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  }).join('')}
+</div>
+
+${earned.length > 0 ? `<h2>Badges obtenus (${earned.length}/${BADGES_DEF.length})</h2>
+
+<div class="badges-wrap">${earned.map(b => `<div class="badge-chip">${b.icon} ${b.name}</div>`).join('')}</div>` : ''}
+
+<div class="footer">
+  <span>PACE v17 · Rapport généré le ${new Date().toLocaleDateString('fr-CH')} à ${new Date().toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' })}</span>
+  <span>${EXP.length} transactions · ${earned.length} badges · Niveau : ${lv.name}</span>
+</div>
+</body></html>`;
+
+```
+const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = 'BudgetPACE_Rapport_Annuel_' + new Date().getFullYear() + '.html';
+a.click();
+URL.revokeObjectURL(url);
+showFB('✅ Rapport annuel généré !', 'var(--green)');
+haptic('success');
+```
+
+} catch (err) {
+alert(’Erreur : ’ + err.message);
+}
+
+if (btn) { btn.disabled = false; btn.innerHTML = ‘📄 Générer le rapport annuel’; }
+}
+
+// ═══════════════════════════════════════
+// TRIPS — Mode Voyage
+// ═══════════════════════════════════════
+
+let TRIPS = JSON.parse(localStorage.getItem(‘pace_trips’) || ‘[]’);
+let ACTIVE_TRIP_ID = localStorage.getItem(‘pace_active_trip’) || null;
+
+function saveTrips() {
+localStorage.setItem(‘pace_trips’, JSON.stringify(TRIPS));
+}
+
+function getActiveTrip() {
+if (!ACTIVE_TRIP_ID) return null;
+return TRIPS.find(t => t.id === ACTIVE_TRIP_ID) || null;
+}
+
+function getTrip(id) {
+return TRIPS.find(t => t.id === id) || null;
+}
+
+function getTripExpenses(tripId) {
+return EXP.filter(e => e.tripId === tripId);
+}
+
+// ── CREATE TRIP ──
+function createTrip() {
+const name = document.getElementById(‘trip-name’)?.value?.trim();
+const dest = document.getElementById(‘trip-dest’)?.value?.trim();
+const budget = parseFloat(document.getElementById(‘trip-budget’)?.value) || 0;
+const currency = document.getElementById(‘trip-currency’)?.value || ‘CHF’;
+const dateStart = document.getElementById(‘trip-start’)?.value;
+const dateEnd = document.getElementById(‘trip-end’)?.value;
+const emoji = document.getElementById(‘trip-emoji’)?.value || ‘✈️’;
+
+if (!name) { showFB(‘Entre un nom pour le voyage’, ‘var(–red)’); return; }
+if (!dateStart) { showFB(‘Entre une date de départ’, ‘var(–red)’); return; }
+
+const trip = {
+id: ‘trip_’ + Date.now(),
+name, dest, budget, currency,
+dateStart, dateEnd,
+emoji,
+createdAt: Date.now(),
+status: ‘active’, // active | ended
+};
+
+TRIPS.push(trip);
+saveTrips();
+setActiveTrip(trip.id);
+haptic(‘success’);
+showFB(‘✈️ Voyage créé ! Mode voyage activé.’, ‘var(–cyan)’);
+renderTrips();
+}
+
+// ── SET ACTIVE TRIP ──
+function setActiveTrip(id) {
+ACTIVE_TRIP_ID = id;
+localStorage.setItem(‘pace_active_trip’, id || ‘’);
+updateTripBanner();
+renderSOWidget();
+renderBalanceWidget();
+renderTrips();
+}
+
+function deactivateTrip() {
+ACTIVE_TRIP_ID = null;
+localStorage.removeItem(‘pace_active_trip’);
+updateTripBanner();
+renderSOWidget();
+renderBalanceWidget();
+renderTrips();
+showFB(‘Mode voyage désactivé’, ‘var(–muted2)’);
+}
+
+function endTrip(id) {
+const t = getTrip(id);
+if (!t) return;
+t.status = ‘ended’;
+t.endedAt = Date.now();
+if (ACTIVE_TRIP_ID === id) {
+ACTIVE_TRIP_ID = null;
+localStorage.removeItem(‘pace_active_trip’);
+updateTripBanner();
+renderSOWidget();
+renderBalanceWidget();
+}
+saveTrips();
+renderTrips();
+haptic(‘success’);
+showFB(‘Voyage terminé ! Voir le résumé ci-dessous.’, ‘var(–green)’);
+}
+
+function deleteTrip(id) {
+if (!confirm(‘Supprimer ce voyage ? Les dépenses liées seront conservées dans l'historique.’)) return;
+TRIPS = TRIPS.filter(t => t.id !== id);
+if (ACTIVE_TRIP_ID === id) {
+ACTIVE_TRIP_ID = null;
+localStorage.removeItem(‘pace_active_trip’);
+updateTripBanner();
+renderSOWidget();
+renderBalanceWidget();
+}
+saveTrips();
+renderTrips();
+}
+
+// ── TRIP BANNER (dashboard) ──
+function updateTripBanner() {
+const banner = document.getElementById(‘trip-banner’);
+if (!banner) return;
+const trip = getActiveTrip();
+if (!trip) { banner.style.display = ‘none’; return; }
+const exps = getTripExpenses(trip.id);
+const total = exps.reduce((s, e) => s + e.amount, 0);
+const pct = trip.budget > 0 ? Math.min(100, Math.round(total / trip.budget * 100)) : 0;
+const remaining = trip.budget > 0 ? trip.budget - total : null;
+banner.style.display = ‘block’;
+banner.innerHTML = `<div class="trip-banner-inner"> <div class="trip-banner-left"> <div class="trip-banner-emoji">${trip.emoji}</div> <div> <div class="trip-banner-name">${trip.name}${trip.dest ? ' · ' + trip.dest : ''}</div> <div class="trip-banner-meta">${exps.length} dépense${exps.length > 1 ? 's' : ''} · ${F(total)} CHF${remaining !== null ? ' · reste ' + F(remaining) + ' CHF' : ''}</div> </div> </div> <div class="trip-banner-right"> <button class="btn btn-ghost btn-sm" onclick="nav('trips',null)" style="margin-right:4px">Voir →</button> <button class="btn btn-sm" style="background:var(--red-dim);color:var(--red)" onclick="deactivateTrip()">✕</button> </div> </div> ${trip.budget > 0 ?`<div class="trip-banner-bar"><div style="height:3px;width:${pct}%;background:${pct>90?'var(--red)':pct>70?'var(--amber)':'var(--cyan)'};border-radius:2px;transition:width .7s ease;"></div></div>`: ''}`;
+}
+
+// ── RENDER TRIPS PAGE ──
+function renderTrips() {
+const el = document.getElementById(‘trips-content’);
+if (!el) return;
+
+const activeTrip = getActiveTrip();
+const activeTrips = TRIPS.filter(t => t.status === ‘active’);
+const endedTrips = TRIPS.filter(t => t.status === ‘ended’);
+
+let html = ‘’;
+
+// Create new trip form
+html += ` <div class="card" style="margin-bottom:.85rem;"> <div class="card-head"><div class="card-title">Nouveau voyage</div></div> <div style="display:grid;grid-template-columns:48px 1fr;gap:1px;align-items:end"> <div class="fgroup"><label class="flabel">Emoji</label> <input type="text" id="trip-emoji" class="finput" value="✈️" maxlength="2" style="text-align:center;font-size:1.2rem;"></div> <div class="fgroup"><label class="flabel">Nom du voyage</label> <input type="text" id="trip-name" class="finput" placeholder="Ex: Vacances Malte, Week-end Paris…"></div> </div> <div class="fgroup"><label class="flabel">Destination</label> <input type="text" id="trip-dest" class="finput" placeholder="Ex: Malte, Paris, Tokyo…"></div> <div style="display:grid;grid-template-columns:1fr 80px;gap:1px"> <div class="fgroup"><label class="flabel">Budget voyage (optionnel)</label> <input type="number" id="trip-budget" class="finput" placeholder="0"></div> <div class="fgroup"><label class="flabel">Devise</label> <select id="trip-currency" class="fselect"> <option value="CHF">CHF</option> <option value="EUR">EUR</option> <option value="USD">USD</option> <option value="GBP">GBP</option> </select></div> </div> <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px"> <div class="fgroup"><label class="flabel">Départ</label> <input type="date" id="trip-start" class="finput"></div> <div class="fgroup"><label class="flabel">Retour</label> <input type="date" id="trip-end" class="finput"></div> </div> <div style="padding:12px 16px 8px"> <button class="btn btn-cyan" style="width:100%;justify-content:center" onclick="createTrip()">✈️ Créer le voyage</button> </div> </div>`;
+
+// Active trips
+if (activeTrips.length > 0) {
+html += `<div class="section-label">Voyages en cours</div>`;
+activeTrips.forEach(trip => {
+html += renderTripCard(trip, true);
+});
+}
+
+// Ended trips
+if (endedTrips.length > 0) {
+html += `<div class="section-label">Voyages passés</div>`;
+endedTrips.forEach(trip => {
+html += renderTripCard(trip, false);
+});
+}
+
+if (TRIPS.length === 0) {
+html += `<div class="empty"><div class="empty-ico"><svg width="1rem" height="1rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></div><div>Aucun voyage</div><div style="font-size:.72rem;color:var(--muted2);margin-top:4px">Crée ton premier voyage ci-dessus</div></div>`;
+}
+
+el.innerHTML = html;
+}
+
+function renderTripCard(trip, isActive) {
+const exps = getTripExpenses(trip.id);
+const total = exps.reduce((s, e) => s + e.amount, 0);
+const pct = trip.budget > 0 ? Math.min(100, Math.round(total / trip.budget * 100)) : 0;
+const remaining = trip.budget > 0 ? trip.budget - total : null;
+const isCurrentActive = ACTIVE_TRIP_ID === trip.id;
+const days = trip.dateStart && trip.dateEnd ?
+Math.ceil((new Date(trip.dateEnd) - new Date(trip.dateStart)) / 86400000) + 1 : null;
+const dailyAvg = exps.length > 0 && days ? Math.round(total / days) : null;
+
+// Group by category
+const catBreakdown = {};
+exps.forEach(e => { catBreakdown[e.cat] = (catBreakdown[e.cat] || 0) + e.amount; });
+const topCats = Object.entries(catBreakdown).sort((a, b) => b[1] - a[1]).slice(0, 4);
+
+return `<div class="trip-card ${isCurrentActive ? 'trip-card-active' : ''}" style="margin-bottom:.75rem;"> <div class="trip-card-header"> <div style="display:flex;align-items:center;gap:10px;"> <div class="trip-emoji-big">${trip.emoji}</div> <div> <div class="trip-card-name">${trip.name}</div> <div class="trip-card-meta">${trip.dest ? trip.dest + ' · ' : ''}${trip.dateStart || ''}${trip.dateEnd ? ' → ' + trip.dateEnd : ''}</div> </div> </div> <div style="display:flex;gap:4px;align-items:center;flex-shrink:0"> ${isActive && !isCurrentActive ?`<button class="btn btn-ghost btn-sm" onclick="setActiveTrip('${trip.id}')">Activer</button>`: ''} ${isCurrentActive ?`<div style="font-size:.65rem;background:var(--cyan-dim);color:var(--cyan);padding:3px 8px;border-radius:10px;font-weight:700;">● Actif</div>`: ''} ${isActive ?`<button class="btn btn-sm" style="background:var(--green-dim);color:var(--green)" onclick="endTrip('${trip.id}')">✓ Terminer</button>` : ‘’}
+<button class="btn btn-sm" style="background:var(--red-dim);color:var(--red)" onclick="deleteTrip('${trip.id}')">✕</button>
+</div>
+</div>
+
+```
+  <div class="trip-kpis">
+    <div class="trip-kpi"><div class="trip-kpi-label">Dépensé</div><div class="trip-kpi-val" style="color:var(--amber)">${F(total)} ${trip.currency}</div></div>
+    ${trip.budget > 0 ? `<div class="trip-kpi"><div class="trip-kpi-label">Budget</div><div class="trip-kpi-val">${F(trip.budget)} ${trip.currency}</div></div>` : ''}
+    ${remaining !== null ? `<div class="trip-kpi"><div class="trip-kpi-label">Reste</div><div class="trip-kpi-val" style="color:${remaining >= 0 ? 'var(--green)' : 'var(--red)'}">${F(remaining)}</div></div>` : ''}
+    ${dailyAvg !== null ? `<div class="trip-kpi"><div class="trip-kpi-label">Moy/jour</div><div class="trip-kpi-val" style="color:var(--cyan)">${F(dailyAvg)}</div></div>` : ''}
+    <div class="trip-kpi"><div class="trip-kpi-label">Transactions</div><div class="trip-kpi-val">${exps.length}</div></div>
+  </div>
+
+  ${trip.budget > 0 ? `<div style="padding:0 14px 10px"><div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden"><div style="height:4px;width:${pct}%;background:${pct>90?'var(--red)':pct>70?'var(--amber)':'var(--cyan)'};border-radius:2px;transition:width .7s ease;"></div></div><div style="font-size:.62rem;color:var(--muted2);margin-top:3px;text-align:right">${pct}% du budget utilisé</div></div>` : ''}
+
+  ${topCats.length > 0 ? `
+    <div style="padding:0 14px 10px;display:flex;flex-wrap:wrap;gap:5px;">
+      ${topCats.map(([cat, val]) => `<div style="font-size:.68rem;padding:3px 8px;border-radius:10px;background:${cc(cat)}20;color:${cc(cat)};font-weight:600">${cat} ${F(val)}</div>`).join('')}
+    </div>` : ''}
+
+  ${exps.length > 0 ? `
+    <div style="border-top:1px solid var(--border);max-height:200px;overflow-y:auto;">
+      ${exps.slice().sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 10).map(e => expHTML(e)).join('')}
+      ${exps.length > 10 ? `<div style="text-align:center;font-size:.72rem;color:var(--muted2);padding:.5rem">+${exps.length - 10} autres dépenses</div>` : ''}
+    </div>` : `<div style="text-align:center;padding:.75rem;font-size:.75rem;color:var(--muted2)">Aucune dépense pour ce voyage</div>`}
+</div>`;
+```
+
+}
+
+// ── SAISIE: tag expense with active trip ──
+// Override submitExpense to attach tripId
+const _origSubmitExpT = submitExpense;
+function submitExpense() {
+_origSubmitExpT();
+const trip = getActiveTrip();
+if (trip && EXP.length > 0) {
+const last = EXP[EXP.length - 1];
+if (!last.tripId) { last.tripId = trip.id; save(); }
+updateTripBanner();
+renderSOWidget();
+renderBalanceWidget();
+}
+}
+
+// Also override submitModal
+const _origSubmitModalT = submitModal;
+function submitModal() {
+_origSubmitModalT();
+const trip = getActiveTrip();
+if (trip && EXP.length > 0) {
+const last = EXP[EXP.length - 1];
+if (!last.tripId) { last.tripId = trip.id; save(); }
+updateTripBanner();
+renderSOWidget();
+renderBalanceWidget();
+}
+}
+
+// ═══════════════════════════════════════
+// ORDRES PERMANENTS
+// Dépenses automatiques chaque mois
+// ═══════════════════════════════════════
+
+let STANDING_ORDERS = JSON.parse(localStorage.getItem(‘pace_standing_orders’) || ‘[]’);
+
+function saveStandingOrders() {
+localStorage.setItem(‘pace_standing_orders’, JSON.stringify(STANDING_ORDERS));
+}
+
+// ── CREATE / EDIT ──
+function saveStandingOrder() {
+const id      = document.getElementById(‘so-id’)?.value || null;
+const name    = document.getElementById(‘so-name’)?.value?.trim();
+const cat     = document.getElementById(‘so-cat’)?.value;
+const amount  = parseFloat(document.getElementById(‘so-amount’)?.value);
+const day     = parseInt(document.getElementById(‘so-day’)?.value) || 1;
+const active  = document.getElementById(‘so-active’)?.classList.contains(‘on’);
+const note    = document.getElementById(‘so-note’)?.value?.trim() || ‘’;
+
+if (!name)   { showFB(‘Entre un nom’, ‘var(–red)’); return; }
+if (!amount || amount <= 0) { showFB(‘Entre un montant valide’, ‘var(–red)’); return; }
+
+if (id) {
+// Edit existing
+const idx = STANDING_ORDERS.findIndex(o => o.id === id);
+if (idx >= 0) {
+STANDING_ORDERS[idx] = { …STANDING_ORDERS[idx], name, cat, amount, day, active, note };
+}
+} else {
+// New
+STANDING_ORDERS.push({
+id:        ‘so_’ + Date.now(),
+name, cat, amount, day,
+active:    true,
+note,
+createdAt: Date.now(),
+lastRun:   null,  // YYYY-MM format of last auto-add
+});
+}
+
+saveStandingOrders();
+resetSOForm();
+haptic(‘success’);
+showFB(‘✅ Ordre permanent enregistré !’, ‘var(–green)’);
+renderStandingOrders();
+}
+
+function editStandingOrder(id) {
+const o = STANDING_ORDERS.find(o => o.id === id);
+if (!o) return;
+document.getElementById(‘so-id’).value      = o.id;
+document.getElementById(‘so-name’).value    = o.name;
+document.getElementById(‘so-cat’).value     = o.cat;
+document.getElementById(‘so-amount’).value  = o.amount;
+document.getElementById(‘so-day’).value     = o.day;
+document.getElementById(‘so-note’).value    = o.note || ‘’;
+const toggle = document.getElementById(‘so-active’);
+if (toggle) toggle.classList.toggle(‘on’, o.active);
+const btn = document.getElementById(‘so-submit-btn’);
+if (btn) btn.textContent = ‘💾 Modifier’;
+document.getElementById(‘so-form-title’).textContent = ‘Modifier l'ordre’;
+document.getElementById(‘so-cancel-btn’).style.display = ‘block’;
+// Scroll to form
+document.getElementById(‘so-form-card’)?.scrollIntoView({ behavior: ‘smooth’ });
+}
+
+function deleteStandingOrder(id) {
+if (!confirm(‘Supprimer cet ordre permanent ?’)) return;
+STANDING_ORDERS = STANDING_ORDERS.filter(o => o.id !== id);
+saveStandingOrders();
+renderStandingOrders();
+haptic(‘light’);
+}
+
+function toggleSOActive(id) {
+const o = STANDING_ORDERS.find(o => o.id === id);
+if (!o) return;
+o.active = !o.active;
+saveStandingOrders();
+renderStandingOrders();
+haptic(‘light’);
+}
+
+function resetSOForm() {
+document.getElementById(‘so-id’).value     = ‘’;
+document.getElementById(‘so-name’).value   = ‘’;
+document.getElementById(‘so-amount’).value = ‘’;
+document.getElementById(‘so-day’).value    = ‘1’;
+document.getElementById(‘so-note’).value   = ‘’;
+const toggle = document.getElementById(‘so-active’);
+if (toggle) toggle.classList.add(‘on’);
+const btn = document.getElementById(‘so-submit-btn’);
+if (btn) btn.textContent = ‘＋ Créer l'ordre’;
+if (document.getElementById(‘so-form-title’)) document.getElementById(‘so-form-title’).textContent = ‘Nouvel ordre permanent’;
+if (document.getElementById(‘so-cancel-btn’)) document.getElementById(‘so-cancel-btn’).style.display = ‘none’;
+}
+
+// ── AUTO-RUN: check and execute due orders ──
+function runStandingOrders(force = false) {
+if (STANDING_ORDERS.length === 0) return;
+const now  = new Date();
+const ym   = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+const today = now.getDate();
+let added = 0;
+const details = [];
+
+STANDING_ORDERS.forEach(o => {
+if (!o.active) return;
+// Already run this month?
+if (o.lastRun === ym && !force) return;
+// Not yet the scheduled day? (unless forced)
+if (today < o.day && !force) return;
+
+```
+// Find the matching budget month
+const MNAMES = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const mi = MF.findIndex(mf =>
+  mf.toLowerCase().includes(String(now.getFullYear())) &&
+  mf.toLowerCase().includes(MNAMES[now.getMonth()])
+);
+const targetMonth = mi >= 0 ? mi : CUR;
+
+// Check if already added this month (avoid duplicates)
+const alreadyExists = EXP.some(e =>
+  e.standingOrderId === o.id &&
+  e.month === targetMonth
+);
+if (alreadyExists) {
+  o.lastRun = ym;
+  return;
+}
+
+// Build the date string for this month
+const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+const safeDay = Math.min(o.day, daysInMonth);
+const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(safeDay).padStart(2,'0')}`;
+
+EXP.push({
+  id:              Date.now() + Math.random(),
+  cat:             o.cat,
+  desc:            o.name + (o.note ? ' — ' + o.note : ''),
+  amount:          o.amount,
+  month:           targetMonth,
+  date:            dateStr,
+  userId:          ACTIVE_USER_ID || 'tau',
+  standingOrderId: o.id,
+  auto:            true,
+});
+
+o.lastRun = ym;
+added++;
+details.push(`${o.name} (${F(o.amount)} CHF)`);
+```
+
+});
+
+if (added > 0) {
+saveStandingOrders();
+save();
+refresh();
+haptic(‘success’);
+// Show notification
+showSONotification(added, details);
+}
+}
+
+function showSONotification(count, details) {
+// In-app toast
+const msg = count === 1
+? `↺ Ordre permanent ajouté : ${details[0]}`
+: `↺ ${count} ordres permanents ajoutés automatiquement`;
+showFB(msg, ‘var(–cyan)’);
+
+// Push notification if enabled
+if (‘Notification’ in window && Notification.permission === ‘granted’) {
+new Notification(‘PACE — Ordres permanents’, {
+body: details.join(’, ‘) + ’ ont été ajoutés automatiquement.’,
+tag: ‘standing-orders’
+});
+}
+}
+
+function runSOManually(id) {
+const o = STANDING_ORDERS.find(o => o.id === id);
+if (!o) return;
+const now = new Date();
+const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+const alreadyExists = EXP.some(e => e.standingOrderId === o.id && e.month === CUR);
+if (alreadyExists) {
+if (!confirm(‘Cet ordre a déjà été exécuté ce mois. Ajouter quand même ?’)) return;
+}
+const MNAMES = [‘janvier’,‘février’,‘mars’,‘avril’,‘mai’,‘juin’,‘juillet’,‘août’,‘septembre’,‘octobre’,‘novembre’,‘décembre’];
+const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+const safeDay = Math.min(o.day, daysInMonth);
+const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(safeDay).padStart(2,'0')}`;
+EXP.push({
+id: Date.now(),
+cat: o.cat,
+desc: o.name + (o.note ? ’ — ’+o.note : ‘’),
+amount: o.amount,
+month: CUR,
+date: dateStr,
+userId: ACTIVE_USER_ID || ‘tau’,
+standingOrderId: o.id,
+auto: true,
+});
+o.lastRun = ym;
+saveStandingOrders();
+save(); refresh();
+haptic(‘success’);
+showFB(`✅ ${o.name} ajouté !`, ‘var(–green)’);
+renderStandingOrders();
+}
+
+// ── RENDER ──
+function renderStandingOrders() {
+const el = document.getElementById(‘so-list’);
+if (!el) return;
+
+// Init cat select in form
+const catSel = document.getElementById(‘so-cat’);
+if (catSel && catSel.options.length === 0) {
+AC.forEach(c => { const o = document.createElement(‘option’); o.value = c; o.textContent = c; catSel.appendChild(o); });
+}
+
+const now = new Date();
+const ym  = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+const today = now.getDate();
+
+if (STANDING_ORDERS.length === 0) {
+el.innerHTML = `<div class="empty"><div class="empty-ico"><svg width="1rem" height="1rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg></div><div class="empty-title">Aucun ordre permanent</div><div class="empty-sub">Crée ton premier ordre ci-dessus pour automatiser tes dépenses récurrentes.</div></div>`;
+return;
+}
+
+const active  = STANDING_ORDERS.filter(o => o.active);
+const inactive = STANDING_ORDERS.filter(o => !o.active);
+
+let html = ‘’;
+
+if (active.length > 0) {
+html += `<div class="section-label">Actifs (${active.length})</div>`;
+active.forEach(o => { html += renderSOCard(o, ym, today); });
+}
+if (inactive.length > 0) {
+html += `<div class="section-label" style="margin-top:1rem;">Pausés (${inactive.length})</div>`;
+inactive.forEach(o => { html += renderSOCard(o, ym, today); });
+}
+
+el.innerHTML = html;
+}
+
+function renderSOCard(o, ym, today) {
+const c = cc(o.cat);
+const ranThisMonth = o.lastRun === ym;
+const isDue = today >= o.day && !ranThisMonth && o.active;
+const nextRun = !ranThisMonth
+? (o.day >= today ? `Le ${o.day} de ce mois` : `Le ${o.day} du mois prochain`)
+: `Exécuté ce mois ✓`;
+
+return `<div class="so-card ${isDue ? 'so-card-due' : ''}"> <div class="so-card-left"> <div class="so-avatar" style="background:${c}20;color:${c}">${o.cat.charAt(0)}</div> <div class="so-info"> <div class="so-name">${o.name}${isDue ? ' <span class="so-due-badge">À exécuter</span>' : ''}</div> <div class="so-meta"> <span style="color:${c};font-weight:600">${o.cat}</span> <span>·</span> <span>Chaque mois le <strong>${o.day}</strong></span> ${o.note ? `<span>· ${o.note}</span>`: ''} </div> <div class="so-next">${ranThisMonth ? '✅' : '🕐'} ${nextRun}</div> </div> </div> <div class="so-card-right"> <div class="so-amount" style="color:${c}">${F(o.amount)} CHF</div> <div class="so-actions"> ${isDue ?`<button class="btn btn-ghost btn-sm" onclick="runSOManually('${o.id}')" title="Exécuter maintenant">▶</button>` : ‘’}
+<div class="toggle ${o.active ? 'on' : ''}" onclick="toggleSOActive('${o.id}')" style="width:38px;height:22px" title="${o.active ? 'Désactiver' : 'Activer'}"></div>
+<button class="btn-edit" onclick="editStandingOrder('${o.id}')" title="Modifier">✏️</button>
+<button class="btn-danger" onclick="deleteStandingOrder('${o.id}')" title="Supprimer">✕</button>
+</div>
+</div>
+
+  </div>`;
+}
+
+// ── DASHBOARD WIDGET ──
+function renderSOWidget() {
+const el = document.getElementById(‘dash-so-widget’);
+if (!el) return;
+const now = new Date();
+const ym  = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+const today = now.getDate();
+const due = STANDING_ORDERS.filter(o => o.active && o.lastRun !== ym && today >= o.day);
+const upcoming = STANDING_ORDERS.filter(o => o.active && o.lastRun !== ym && today < o.day).sort((a,b) => a.day - b.day).slice(0,3);
+const doneThisMonth = STANDING_ORDERS.filter(o => o.active && o.lastRun === ym);
+
+if (STANDING_ORDERS.filter(o => o.active).length === 0) { el.style.display = ‘none’; return; }
+el.style.display = ‘block’;
+
+let html = ‘’;
+if (due.length > 0) {
+html += `<div class="alert alert-warn" style="margin-bottom:6px;cursor:pointer" onclick="nav('standing',null)"> ↺ <strong>${due.length} ordre${due.length>1?'s':''} permanent${due.length>1?'s':''}</strong> à exécuter ce mois <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="event.stopPropagation();runStandingOrders()">Tout exécuter</button> </div>`;
+}
+if (upcoming.length > 0) {
+html += `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:2px"> ${upcoming.map(o => `<div style="font-size:.68rem;padding:3px 8px;border-radius:10px;background:${cc(o.cat)}18;color:${cc(o.cat)};font-weight:600">Le ${o.day} · ${o.name} ${F(o.amount)} CHF</div>`).join('')} </div>`;
+}
+if (doneThisMonth.length > 0 && due.length === 0 && upcoming.length === 0) {
+html += `<div style="font-size:.72rem;color:var(--muted2)">✅ ${doneThisMonth.length} ordre${doneThisMonth.length>1?'s':''} exécuté${doneThisMonth.length>1?'s':''} ce mois</div>`;
+}
+el.innerHTML = html;
+}
+
+// ── ORDRE PERMANENT DEPUIS SAISIE ──
+function toggleSOQuick() {
+const panel = document.getElementById(‘f-so-quick-panel’);
+const btn   = document.getElementById(‘f-so-toggle-btn’);
+if (!panel) return;
+const open = panel.style.display === ‘none’;
+panel.style.display = open ? ‘block’ : ‘none’;
+btn.style.color     = open ? ‘var(–cyan)’ : ‘var(–muted2)’;
+btn.style.borderColor = open ? ‘var(–cyan)’ : ‘var(–border2)’;
+if (open) {
+// Pre-fill day from current date
+const today = new Date().getDate();
+const dayEl = document.getElementById(‘f-so-day’);
+if (dayEl) dayEl.value = today;
+}
+}
+
+function saveSOFromForm() {
+const name   = document.getElementById(‘f-desc’)?.value?.trim() || document.getElementById(‘f-cat’)?.value;
+const cat    = document.getElementById(‘f-cat’)?.value;
+const amount = parseFloat(document.getElementById(‘f-amount’)?.value);
+const day    = parseInt(document.getElementById(‘f-so-day’)?.value) || 1;
+const note   = document.getElementById(‘f-so-note’)?.value?.trim() || ‘’;
+
+if (!amount || amount <= 0) { showFB(“Entre un montant d’abord”, ‘var(–red)’); return; }
+
+// Check if already exists
+const exists = STANDING_ORDERS.find(o =>
+o.name === name && o.cat === cat && Math.abs(o.amount - amount) < 0.01
+);
+if (exists) {
+showFB(‘Cet ordre existe déjà !’, ‘var(–amber)’);
+return;
+}
+
+STANDING_ORDERS.push({
+id:        ‘so_’ + Date.now(),
+name:      name || cat,
+cat, amount, day,
+active:    true,
+note,
+createdAt: Date.now(),
+lastRun:   null,
+});
+
+saveStandingOrders();
+haptic(‘success’);
+
+// Close panel
+const panel = document.getElementById(‘f-so-quick-panel’);
+const btn   = document.getElementById(‘f-so-toggle-btn’);
+if (panel) panel.style.display = ‘none’;
+if (btn) { btn.style.color = ‘var(–muted2)’; btn.style.borderColor = ‘var(–border2)’; }
+
+showFB(`↺ Ordre permanent créé : ${name || cat} ${F(amount)} CHF le ${day} de chaque mois`, ‘var(–cyan)’);
+}
+
+// ═══════════ 1. WIDGET SOLDE DASHBOARD ═══════════
+function renderBalanceWidget() {
+const el = document.getElementById(‘dash-balance-widget’);
+if (!el) return;
+const mi = CUR;
+const rev = revM(mi), sp = expT(mi), net = rev - sp;
+const bud = budM(mi);
+const now = new Date();
+const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+const daysPassed = now.getDate();
+const daysLeft = daysInMonth - daysPassed;
+const dailyRate = daysPassed > 0 && sp > 0 ? sp / daysPassed : 0;
+const projected = sp + dailyRate * daysLeft;
+const savedThisMonth = Math.max(0, net);
+// Total saved all months
+const totalSaved = Array.from({length: CUR+1}, (_,i) => Math.max(0, revM(i) - expT(i))).reduce((a,b)=>a+b,0);
+const pctOfRev = rev > 0 ? Math.round(savedThisMonth / rev * 100) : 0;
+
+el.innerHTML = `<div class="bal-widget"> <div class="bal-main"> <div class="bal-label">Disponible ce mois</div> <div class="bal-amount" style="color:${net>=0?'var(--green)':'var(--red)'}"> ${net >= 0 ? '' : '-'}${F(Math.abs(net))} <span class="bal-currency">CHF</span> </div> <div class="bal-sub">${net >= 0 ? '▲ ' + pctOfRev + '% du revenu épargné' : '▼ Déficit ce mois'}</div> </div> <div class="bal-grid"> <div class="bal-stat"> <div class="bal-stat-label">Dépensé</div> <div class="bal-stat-val" style="color:var(--amber)">${F(sp)}</div> </div> <div class="bal-stat"> <div class="bal-stat-label">Budget</div> <div class="bal-stat-val">${F(bud)}</div> </div> <div class="bal-stat"> <div class="bal-stat-label">Reste ${daysLeft}j</div> <div class="bal-stat-val" style="color:${bud-sp>=0?'var(--green)':'var(--red)'}">${F(bud-sp)}</div> </div> <div class="bal-stat"> <div class="bal-stat-label">Total épargné</div> <div class="bal-stat-val" style="color:var(--cyan)">${F(totalSaved)}</div> </div> </div> ${bud > 0 ?`
+<div class="bal-bar-wrap">
+<div class="bal-bar-track">
+<div class="bal-bar-fill" style="width:${Math.min(100,Math.round(sp/bud*100))}%;background:${sp>bud?'var(--red)':sp/bud>0.8?'var(--amber)':'var(--green)'}"></div>
+${projected > bud ? `<div class="bal-bar-proj" style="width:${Math.min(100,Math.round(projected/bud*100))}%;"></div>` : ‘’}
+</div>
+<div class="bal-bar-labels">
+<span>${Math.round(sp/bud*100)}% utilisé</span>
+${dailyRate > 0 ? `<span style="color:var(--muted2)">Projeté : ${F(Math.round(projected))} CHF</span>` : ‘’}
+</div>
+</div>` : ''} </div>`;
+}
+
+// ═══════════ 2. BILAN FISCAL ═══════════
+// Barèmes suisses simplifiés 2024
+const TAX_RATES_CH = {
+single: [
+{ min: 0,      max: 14500,  rate: 0 },
+{ min: 14500,  max: 31600,  rate: 0.077 },
+{ min: 31600,  max: 41400,  rate: 0.088 },
+{ min: 41400,  max: 55200,  rate: 0.099 },
+{ min: 55200,  max: 72500,  rate: 0.110 },
+{ min: 72500,  max: 78100,  rate: 0.121 },
+{ min: 78100,  max: 103600, rate: 0.132 },
+{ min: 103600, max: 134600, rate: 0.143 },
+{ min: 134600, max: 176000, rate: 0.154 },
+{ min: 176000, max: Infinity, rate: 0.115 },
+]
+};
+
+function calcFederalTax(income, status) {
+const brackets = TAX_RATES_CH[status] || TAX_RATES_CH.single;
+let tax = 0;
+for (const b of brackets) {
+if (income <= b.min) break;
+const taxable = Math.min(income, b.max) - b.min;
+tax += taxable * b.rate;
+}
+return Math.round(tax);
+}
+
+function renderFiscal() {
+const el = document.getElementById(‘fiscal-content’);
+if (!el) return;
+
+const data = JSON.parse(localStorage.getItem(‘pace_fiscal’) || ‘{}’);
+const annualRev = Array.from({length: MF.length}, (*,i) => revM(i)).reduce((a,b)=>a+b,0);
+const annualSp = Array.from({length: MF.length}, (*,i) => expT(i)).reduce((a,b)=>a+b,0);
+const annualNet = annualRev - annualSp;
+const status = data.status || ‘single’;
+const canton = data.canton || ‘VD’;
+const deductions = parseFloat(data.deductions) || 0;
+const taxableIncome = Math.max(0, annualRev - deductions);
+
+// Federal tax
+const fedTax = calcFederalTax(taxableIncome, status);
+// Canton multiplier (approximate rates for major cantons)
+const cantonRates = { ZH:1.15, BE:1.68, LU:1.6, UR:1.25, SZ:1.25, OW:1.25, NW:1.25, GL:1.4, ZG:0.82, FR:1.5, SO:1.45, BS:1.9, BL:1.7, SH:1.45, AR:1.3, AI:1.2, SG:1.25, GR:1.4, AG:1.25, TG:1.15, TI:1.2, VD:1.55, VS:1.5, NE:1.85, GE:1.9, JU:1.8 };
+const cantonMultiplier = cantonRates[canton] || 1.5;
+const cantonTax = Math.round(fedTax * cantonMultiplier * 0.6);
+const totalTax = fedTax + cantonTax;
+const effectiveRate = annualRev > 0 ? (totalTax / annualRev * 100).toFixed(1) : 0;
+const alreadyPaid = Array.from({length: MF.length}, (_,i) => expC(i,‘Impôts’)).reduce((a,b)=>a+b,0);
+const diff = totalTax - alreadyPaid;
+
+el.innerHTML = ` <div class="card" style="margin-bottom:.85rem;"> <div class="card-head"><div class="card-title">Paramètres fiscaux</div></div> <div class="fgroup"><label class="flabel">Situation</label> <select class="fselect" id="fis-status" onchange="saveFiscalParams()"> <option value="single" ${status==='single'?'selected':''}>Célibataire</option> <option value="married" ${status==='married'?'selected':''}>Marié(e)</option> </select></div> <div class="fgroup"><label class="flabel">Canton</label> <select class="fselect" id="fis-canton" onchange="saveFiscalParams()"> ${Object.keys(cantonRates).map(c=>`<option value=”${c}” ${canton===c?‘selected’:’’}>${c}</option>`).join('')} </select></div> <div class="fgroup"><label class="flabel">Déductions estimées (CHF)</label> <input type="number" id="fis-deductions" class="finput" value="${deductions}" placeholder="Ex: 3000 (frais prof., 3e pilier…)" oninput="saveFiscalParams()"></div> </div> <div class="g2" style="margin-bottom:.85rem;"> <div class="kpi-card"><div class="kpi-tag">Revenu imposable</div><div class="kpi-num" style="color:var(--cyan)">${F(taxableIncome)}<span>CHF</span></div></div> <div class="kpi-card"><div class="kpi-tag">Taux effectif</div><div class="kpi-num" style="color:var(--amber)">${effectiveRate}<span>%</span></div></div> </div> <div class="card" style="margin-bottom:.85rem;"> <div class="card-head" style="margin-bottom:4px;"><div class="card-title">Estimation impôts</div></div> <div class="stat-row"><span class="stat-label">Impôt fédéral direct</span><span class="stat-val" style="color:var(--amber)">${F(fedTax)} CHF</span></div> <div class="stat-row"><span class="stat-label">Impôt cantonal + communal (${canton})</span><span class="stat-val" style="color:var(--amber)">${F(cantonTax)} CHF</span></div> <div class="stat-row" style="border-top:1px solid var(--border2)"><span class="stat-label" style="font-weight:700">Total estimé</span><span class="stat-val" style="color:var(--red);font-size:1rem;font-weight:800">${F(totalTax)} CHF</span></div> </div> <div class="card" style="margin-bottom:.85rem;"> <div class="card-head" style="margin-bottom:4px;"><div class="card-title">Acomptes vs Estimation</div></div> <div class="stat-row"><span class="stat-label">Acomptes déjà saisis</span><span class="stat-val" style="color:var(--cyan)">${F(alreadyPaid)} CHF</span></div> <div class="stat-row"><span class="stat-label">Estimation totale</span><span class="stat-val">${F(totalTax)} CHF</span></div> <div class="stat-row" style="border-top:1px solid var(--border2)"> <span class="stat-label" style="font-weight:700">${diff > 0 ? 'Complément à payer' : 'Surplus versé'}</span> <span class="stat-val" style="color:${diff>0?'var(--red)':'var(--green)'};font-weight:800">${diff>0?'+':''}${F(diff)} CHF</span> </div> </div> <div class="alert alert-info" style="font-size:.72rem;line-height:1.6;"> ⚠️ Estimation indicative basée sur les barèmes fédéraux 2024. Les taux cantonaux sont approximatifs. Consulte un fiscaliste pour ta déclaration officielle. </div>`;
+}
+
+function saveFiscalParams() {
+const data = {
+status: document.getElementById(‘fis-status’)?.value || ‘single’,
+canton: document.getElementById(‘fis-canton’)?.value || ‘VD’,
+deductions: document.getElementById(‘fis-deductions’)?.value || ‘0’,
+};
+localStorage.setItem(‘pace_fiscal’, JSON.stringify(data));
+renderFiscal();
+}
+
+// ═══════════ 3. SCAN TICKET IA ═══════════
+async function scanReceiptAI(input, prefix) {
+if (!input.files || !input.files[0]) return;
+const file = input.files[0];
+const btn = document.getElementById(`${prefix}-scan-btn`);
+const resultEl = document.getElementById(`${prefix}-scan-result`);
+if (btn) { btn.disabled = true; btn.innerHTML = ‘<span>⏳</span> Analyse en cours…’; }
+if (resultEl) { resultEl.style.display = ‘block’; resultEl.textContent = ‘🤖 Analyse du ticket par IA…’; }
+
+try {
+// Convert image to base64
+const base64 = await new Promise((res, rej) => {
+const reader = new FileReader();
+reader.onload = () => res(reader.result.split(’,’)[1]);
+reader.onerror = rej;
+reader.readAsDataURL(file);
+});
+const mimeType = file.type || ‘image/jpeg’;
+
+```
+// Show preview
+const previewEl = document.getElementById(`${prefix}-scan-preview`);
+const previewImg = document.getElementById(`${prefix}-scan-img`);
+if (previewEl && previewImg) {
+  previewImg.src = `data:${mimeType};base64,${base64}`;
+  previewEl.style.display = 'block';
+}
+
+// Call Claude API with vision
+const prompt = `Tu analyses un ticket de caisse ou une facture. Extrais UNIQUEMENT ces informations en JSON (rien d'autre, pas de backticks) :
+```
+
+{
+“merchant”: “nom du commerce”,
+“total”: 12.50,
+“date”: “2026-03-15”,
+“category”: “Alimentation”,
+“description”: “courte description”
+}
+
+Catégories possibles : Alimentation, Transport, Santé/Beauté, Loisirs, Logement, Assurances, Abonnements, Voyage, Autre.
+Si tu ne peux pas lire le ticket, retourne {“error”: “illisible”}.
+Réponds UNIQUEMENT avec le JSON, aucun texte avant ou après.`;
+
+```
+const resp = await fetch('https://api.anthropic.com/v1/messages', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 300,
+    messages: [{
+      role: 'user',
+      content: [
+        { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64 } },
+        { type: 'text', text: prompt }
+      ]
+    }]
+  })
+});
+
+const data = await resp.json();
+const text = data.content?.find(b => b.type === 'text')?.text || '';
+const clean = text.replace(/```json|```/g, '').trim();
+const parsed = JSON.parse(clean);
+
+if (parsed.error) {
+  if (resultEl) { resultEl.textContent = '⚠️ Ticket illisible. Saisis les champs manuellement.'; }
+} else {
+  // Fill form fields
+  if (parsed.total && parsed.total > 0) {
+    const amtEl = document.getElementById(`${prefix}-amount`);
+    if (amtEl) amtEl.value = parsed.total;
+  }
+  if (parsed.category) {
+    const catEl = document.getElementById(`${prefix}-cat`);
+    if (catEl) catEl.value = parsed.category;
+  }
+  if (parsed.description || parsed.merchant) {
+    const descEl = document.getElementById(`${prefix}-desc`);
+    if (descEl) descEl.value = parsed.description || parsed.merchant;
+  }
+  if (parsed.date) {
+    const dateEl = document.getElementById(`${prefix}-date`);
+    if (dateEl) {
+      dateEl.value = parsed.date;
+      if (prefix === 'f') syncMonthFromDate('f');
+    }
+  }
+  if (resultEl) {
+    resultEl.style.background = 'var(--green-dim)';
+    resultEl.style.color = 'var(--green)';
+    resultEl.innerHTML = `✅ Détecté : <strong>${parsed.merchant || parsed.description}</strong> — ${parsed.total} CHF · ${parsed.category}`;
+  }
+  haptic('success');
+  checkDuplicate();
+}
+```
+
+} catch (err) {
+if (resultEl) {
+resultEl.style.background = ‘var(–red-dim)’;
+resultEl.style.color = ‘var(–red)’;
+resultEl.textContent = ’⚠️ Erreur : ’ + (err.message || ‘connexion impossible’);
+}
+} finally {
+if (btn) { btn.disabled = false; btn.innerHTML = ‘<span>📷</span> Scanner avec IA’; }
+}
+}
+
+// ═══════════════════════════════════════
+// FEATURE 1 — SUIVI 3E PILIER
+// ═══════════════════════════════════════
+const PILLAR3_MAX_2026 = 7258; // CHF — plafond déductible 2026
+
+function renderPillar3() {
+const el = document.getElementById(‘pillar3-content’);
+if (!el) return;
+const data = JSON.parse(localStorage.getItem(‘pace_pillar3’) || ‘{}’);
+const year = new Date().getFullYear();
+const versements = data.versements || [];
+const thisYear = versements.filter(v => v.date && v.date.startsWith(String(year)));
+const totalThisYear = thisYear.reduce((s, v) => s + v.amount, 0);
+const remaining = Math.max(0, PILLAR3_MAX_2026 - totalThisYear);
+const pct = Math.min(100, Math.round(totalThisYear / PILLAR3_MAX_2026 * 100));
+const deadline = `${year}-12-31`;
+const daysLeft = Math.ceil((new Date(deadline) - new Date()) / 86400000);
+const providers = data.providers || [];
+
+el.innerHTML = `<div class="card" style="margin-bottom:.85rem;background:linear-gradient(135deg,rgba(0,229,160,.07),rgba(0,212,255,.04));border:1px solid rgba(0,229,160,.2);"> <div class="card-head"><div class="card-title">Avancement ${year}</div></div> <div style="padding:14px 16px;"> <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;"> <div style="font-size:1.8rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--green)">${F(totalThisYear)} <span style="font-size:.8rem;color:var(--muted2)">CHF</span></div> <div style="text-align:right;font-size:.72rem;color:var(--muted2);">sur ${F(PILLAR3_MAX_2026)} CHF max<br><span style="color:${daysLeft<30?'var(--red)':'var(--muted2)'}">⏱ ${daysLeft} jours restants</span></div> </div> <div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-bottom:5px;"> <div style="height:8px;width:${pct}%;background:${pct>=100?'var(--green)':pct>=50?'var(--cyan)':'var(--amber)'};border-radius:4px;transition:width .7s ease;"></div> </div> <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted2);"> <span>${pct}% versé</span> <span style="color:${remaining>0?'var(--amber)':'var(--green)'}">${remaining>0?'Reste à verser : '+F(remaining)+' CHF':'✅ Plafond atteint !'}</span> </div> ${remaining > 0 && daysLeft < 60 ?`<div class="alert alert-warn" style="margin-top:8px;font-size:.72rem;">⚠️ Il te reste ${daysLeft} jours pour verser ${F(remaining)} CHF et maximiser ta déduction fiscale ${year}.</div>` : ‘’}
+</div>
+</div>
+
+```
+<div class="g2" style="margin-bottom:.85rem;">
+  <div class="kpi-card"><div class="kpi-tag">Économie fiscale estimée</div><div class="kpi-num" style="color:var(--green)">${F(Math.round(totalThisYear * 0.22))}<span>CHF</span></div><div style="font-size:.62rem;color:var(--muted2);margin-top:4px;">~22% taux marginal moyen VD</div></div>
+  <div class="kpi-card"><div class="kpi-tag">Versements ${year}</div><div class="kpi-num" style="color:var(--cyan)">${thisYear.length}<span>paiements</span></div></div>
+</div>
+
+<div class="section-label">Ajouter un versement</div>
+<div class="input-group" style="margin-bottom:.85rem;">
+  <div class="fgroup"><label class="flabel">Prestataire</label>
+    <select id="p3-provider" class="fselect">
+      <option value="VIAC">VIAC</option>
+      <option value="finpension">finpension</option>
+      <option value="Frankly">Frankly (ZKB)</option>
+      <option value="PostFinance">PostFinance e-Vorsoge</option>
+      <option value="Baloise">Baloise Salamander</option>
+      <option value="Autre">Autre</option>
+    </select></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;">
+    <div class="fgroup"><label class="flabel">Montant (CHF)</label><input type="number" id="p3-amount" class="finput" placeholder="0" max="${PILLAR3_MAX_2026}" step="0.01"></div>
+    <div class="fgroup"><label class="flabel">Date</label><input type="date" id="p3-date" class="finput" value="${new Date().toISOString().split('T')[0]}"></div>
+  </div>
+  <div class="fgroup"><label class="flabel">Note (optionnel)</label><input type="text" id="p3-note" class="finput" placeholder="Ex: versement mensuel"></div>
+  <div style="padding:8px 16px 12px;"><button class="btn btn-cyan btn-full" onclick="addPillar3Entry()">＋ Enregistrer le versement</button></div>
+</div>
+
+${versements.length > 0 ? `
+<div class="section-label">Historique des versements</div>
+<div class="exp-list">
+  ${versements.slice().sort((a,b) => (b.date||'').localeCompare(a.date||'')).map(v => `
+    <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);">
+      <div style="width:36px;height:36px;border-radius:10px;background:var(--green-dim);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:var(--green);flex-shrink:0;">${v.provider?.charAt(0)||'3'}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:.86rem;font-weight:600;">${v.provider || 'Pilier 3a'}</div>
+        <div style="font-size:.68rem;color:var(--muted2);">${v.date||''}${v.note?' · '+v.note:''}</div>
+      </div>
+      <div style="font-size:.92rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--green)">+${F(v.amount)}</div>
+      <button class="btn-danger" onclick="deletePillar3(${v.id})">✕</button>
+    </div>`).join('')}
+</div>` : ''}`;
+```
+
+}
+
+function addPillar3Entry() {
+const amount = parseFloat(document.getElementById(‘p3-amount’)?.value);
+const date   = document.getElementById(‘p3-date’)?.value;
+const provider = document.getElementById(‘p3-provider’)?.value || ‘VIAC’;
+const note   = document.getElementById(‘p3-note’)?.value?.trim() || ‘’;
+if (!amount || amount <= 0) { showFB(‘Entre un montant valide’, ‘var(–red)’); return; }
+const data = JSON.parse(localStorage.getItem(‘pace_pillar3’) || ‘{}’);
+if (!data.versements) data.versements = [];
+data.versements.push({ id: Date.now(), amount, date, provider, note });
+localStorage.setItem(‘pace_pillar3’, JSON.stringify(data));
+document.getElementById(‘p3-amount’).value = ‘’;
+document.getElementById(‘p3-note’).value = ‘’;
+haptic(‘success’);
+showFB(‘✅ Versement 3e pilier enregistré !’, ‘var(–green)’);
+renderPillar3();
+}
+
+function deletePillar3(id) {
+const data = JSON.parse(localStorage.getItem(‘pace_pillar3’) || ‘{}’);
+data.versements = (data.versements || []).filter(v => v.id !== id);
+localStorage.setItem(‘pace_pillar3’, JSON.stringify(data));
+renderPillar3();
+}
+
+// ═══════════════════════════════════════
+// FEATURE 2 — MODE EXPATRIÉ / FRONTALIER
+// ═══════════════════════════════════════
+let EXPAT_RATES = {};
+
+async function fetchExpatRates() {
+const currencies = [‘EUR’,‘USD’,‘GBP’,‘CAD’,‘AUD’,‘JPY’,‘SEK’,‘NOK’];
+try {
+const r = await fetch(`https://api.frankfurter.app/latest?from=CHF&to=${currencies.join(',')}`);
+const d = await r.json();
+if (d.rates) { EXPAT_RATES = d.rates; localStorage.setItem(‘pace_expat_rates’, JSON.stringify({ r: d.rates, ts: Date.now() })); }
+} catch(e) {
+const c = localStorage.getItem(‘pace_expat_rates’);
+if (c) EXPAT_RATES = JSON.parse(c).r;
+}
+}
+
+function renderExpat() {
+const el = document.getElementById(‘expat-content’);
+if (!el) return;
+const data = JSON.parse(localStorage.getItem(‘pace_expat’) || ‘{}’);
+const profile = data.profile || ‘resident’; // resident, frontalier, expat
+const secondCurrency = data.secondCurrency || ‘EUR’;
+const incomeAbroad = parseFloat(data.incomeAbroad) || 0;
+const rate = EXPAT_RATES[secondCurrency] || 0.93;
+const mi = CUR;
+const rev = revM(mi), sp = expT(mi);
+
+el.innerHTML = `<div class="card" style="margin-bottom:.85rem;"> <div class="card-head" style="margin-bottom:4px;"><div class="card-title">Mon profil</div></div> <div style="display:flex;gap:6px;padding:10px 16px;flex-wrap:wrap;"> ${[['resident','🏠 Résident CH'],['frontalier','🚗 Frontalier'],['expat','✈️ Expatrié']].map(([v,l]) =>`<div onclick="saveExpatProfile('${v}')" style="flex:1;min-width:80px;padding:8px 10px;border-radius:var(--radius-sm);border:2px solid ${profile===v?'var(--cyan)':'var(--border)'};background:${profile===v?'var(--cyan-dim)':'var(--bg2)'};cursor:pointer;text-align:center;font-size:.75rem;font-weight:600;color:${profile===v?'var(--cyan)':'var(--muted2)'};">${l}</div>`
+).join(’’)}
+</div>
+</div>
+
+```
+<div class="card" style="margin-bottom:.85rem;">
+  <div class="card-head" style="margin-bottom:4px;"><div class="card-title">Devise secondaire</div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;">
+    <div class="fgroup"><label class="flabel">Devise étrangère</label>
+      <select class="fselect" id="expat-currency" onchange="saveExpatCurrency(this.value)">
+        ${['EUR','USD','GBP','CAD','AUD','JPY','SEK','NOK'].map(c => `<option value="${c}" ${secondCurrency===c?'selected':''}>${c}</option>`).join('')}
+      </select></div>
+    <div class="fgroup"><label class="flabel">Revenu à l'étranger</label>
+      <input type="number" id="expat-income" class="finput" placeholder="0" value="${incomeAbroad||''}" oninput="saveExpatIncome(this.value)"></div>
+  </div>
+</div>
+
+<div class="section-label">Conversion de tes finances ce mois</div>
+<div class="card" style="margin-bottom:.85rem;">
+  ${rate > 0 ? `
+  <div class="stat-row"><span class="stat-label">1 CHF =</span><span class="stat-val" style="color:var(--cyan);font-family:'JetBrains Mono',monospace;">${rate.toFixed(4)} ${secondCurrency}</span></div>
+  <div class="stat-row"><span class="stat-label">Revenu CHF</span><span class="stat-val">${F(rev)} CHF = <span style="color:var(--cyan)">${F(Math.round(rev*rate))} ${secondCurrency}</span></span></div>
+  <div class="stat-row"><span class="stat-label">Dépenses CHF</span><span class="stat-val">${F(sp)} CHF = <span style="color:var(--amber)">${F(Math.round(sp*rate))} ${secondCurrency}</span></span></div>
+  <div class="stat-row"><span class="stat-label">Net épargne</span><span class="stat-val" style="color:${rev-sp>=0?'var(--green)':'var(--red)'}">${F(rev-sp)} CHF = ${F(Math.round((rev-sp)*rate))} ${secondCurrency}</span></div>
+  ${incomeAbroad > 0 ? `<div class="stat-row"><span class="stat-label">Revenu étranger → CHF</span><span class="stat-val" style="color:var(--cyan)">${F(incomeAbroad)} ${secondCurrency} = ${F(Math.round(incomeAbroad/rate))} CHF</span></div>` : ''}
+  <div class="stat-row"><span class="stat-label">Dernière mise à jour</span><span class="stat-val" style="color:var(--muted2);font-size:.72rem;">${(() => { const c=localStorage.getItem('pace_expat_rates'); return c?new Date(JSON.parse(c).ts).toLocaleTimeString('fr-CH',{hour:'2-digit',minute:'2-digit'}):'—'; })()}</span></div>
+  ` : '<div style="padding:12px 16px;font-size:.78rem;color:var(--muted2);">Chargement des taux…</div>'}
+</div>
+
+<div class="section-label">Convertisseur rapide</div>
+<div class="card">
+  <div style="display:grid;grid-template-columns:1fr 40px 1fr;align-items:center;gap:8px;padding:12px 16px;">
+    <div><label class="flabel" style="padding:0 0 4px;">CHF</label><input type="number" id="conv-chf" class="finput" style="padding:8px 10px;" placeholder="100" oninput="convertExpat('chf')"></div>
+    <div style="text-align:center;font-size:1.2rem;color:var(--muted2);margin-top:16px;">⇄</div>
+    <div><label class="flabel" style="padding:0 0 4px;">${secondCurrency}</label><input type="number" id="conv-foreign" class="finput" style="padding:8px 10px;" placeholder="${rate>0?(100*rate).toFixed(2):'—'}" oninput="convertExpat('foreign')"></div>
+  </div>
+</div>`;
+```
+
+fetchExpatRates().then(renderExpat);
+}
+
+function convertExpat(from) {
+const rate = EXPAT_RATES[document.getElementById(‘expat-currency’)?.value || ‘EUR’] || 0.93;
+if (from === ‘chf’) {
+const v = parseFloat(document.getElementById(‘conv-chf’)?.value) || 0;
+const f = document.getElementById(‘conv-foreign’); if(f) f.value = v > 0 ? (v*rate).toFixed(2) : ‘’;
+} else {
+const v = parseFloat(document.getElementById(‘conv-foreign’)?.value) || 0;
+const c = document.getElementById(‘conv-chf’); if(c) c.value = v > 0 ? (v/rate).toFixed(2) : ‘’;
+}
+}
+
+function saveExpatProfile(p) { const d=JSON.parse(localStorage.getItem(‘pace_expat’)||’{}’); d.profile=p; localStorage.setItem(‘pace_expat’,JSON.stringify(d)); renderExpat(); }
+function saveExpatCurrency(c) { const d=JSON.parse(localStorage.getItem(‘pace_expat’)||’{}’); d.secondCurrency=c; localStorage.setItem(‘pace_expat’,JSON.stringify(d)); renderExpat(); }
+function saveExpatIncome(v) { const d=JSON.parse(localStorage.getItem(‘pace_expat’)||’{}’); d.incomeAbroad=v; localStorage.setItem(‘pace_expat’,JSON.stringify(d)); }
+
+// ═══════════════════════════════════════
+// FEATURE 3 — QR-BILL SCANNER
+// ═══════════════════════════════════════
+async function scanQRBill(input) {
+if (!input.files || !input.files[0]) return;
+const file = input.files[0];
+const btn = document.getElementById(‘qr-scan-btn’);
+const resultEl = document.getElementById(‘qr-scan-result’);
+if (btn) { btn.disabled = true; btn.innerHTML = ‘⏳ Analyse…’; }
+if (resultEl) { resultEl.style.display = ‘block’; resultEl.textContent = ‘🤖 Analyse de la facture par IA…’; }
+
+try {
+const base64 = await new Promise((res, rej) => {
+const reader = new FileReader();
+reader.onload = () => res(reader.result.split(’,’)[1]);
+reader.onerror = rej;
+reader.readAsDataURL(file);
+});
+const mimeType = file.type || ‘image/jpeg’;
+
+```
+const prompt = `Analyse ce QR-bill suisse (facture avec code QR). Extrais ces informations en JSON pur (sans backticks ni texte autour) :
+```
+
+{
+“creditor”: “nom du créancier”,
+“amount”: 125.50,
+“currency”: “CHF”,
+“iban”: “CH…”,
+“reference”: “numéro de référence”,
+“due_date”: “2026-03-31”,
+“description”: “description courte”,
+“category”: “catégorie suggérée parmi: Logement, Assurances, Impôts, Abonnements, Alimentation, Transport, Santé/Beauté, Loisirs, Dettes, Voyage, Autre”
+}
+Si c’est illisible, retourne {“error”: “illisible”}.`;
+
+```
+const resp = await fetch('https://api.anthropic.com/v1/messages', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 400,
+    messages: [{ role: 'user', content: [
+      { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64 } },
+      { type: 'text', text: prompt }
+    ]}]
+  })
+});
+
+const data = await resp.json();
+const text = data.content?.find(b => b.type === 'text')?.text || '';
+const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+
+if (parsed.error) {
+  resultEl.textContent = '⚠️ Facture illisible — saisis manuellement.';
+} else {
+  const el = document.getElementById('qr-bill-details');
+  if (el) {
+    el.style.display = 'block';
+    el.innerHTML = `
+      <div class="card" style="margin-bottom:.85rem;background:var(--cyan-dim);border:1px solid rgba(0,212,255,.2);">
+        <div class="card-head" style="margin-bottom:4px;"><div class="card-title">✅ Facture détectée</div></div>
+        <div class="stat-row"><span class="stat-label">Créancier</span><span class="stat-val">${parsed.creditor||'—'}</span></div>
+        <div class="stat-row"><span class="stat-label">Montant</span><span class="stat-val" style="color:var(--amber);font-size:1rem;font-weight:800;">${parsed.amount||'—'} ${parsed.currency||'CHF'}</span></div>
+        <div class="stat-row"><span class="stat-label">IBAN</span><span class="stat-val" style="font-size:.75rem;font-family:'JetBrains Mono',monospace;">${parsed.iban||'—'}</span></div>
+        <div class="stat-row"><span class="stat-label">Référence</span><span class="stat-val" style="font-size:.72rem;font-family:'JetBrains Mono',monospace;">${parsed.reference||'—'}</span></div>
+        <div class="stat-row"><span class="stat-label">Échéance</span><span class="stat-val" style="color:${parsed.due_date && new Date(parsed.due_date)<new Date()?'var(--red)':'var(--text)'}">${parsed.due_date||'—'}</span></div>
+        <div class="stat-row"><span class="stat-label">Catégorie suggérée</span><span class="stat-val" style="color:var(--cyan)">${parsed.category||'—'}</span></div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-cyan" style="flex:2;justify-content:center;" onclick="addQRBillExpense(${JSON.stringify(parsed).replace(/"/g,'&quot;')})">＋ Ajouter en dépense</button>
+        <button class="btn btn-secondary" style="flex:1;justify-content:center;" onclick="document.getElementById('qr-bill-details').style.display='none'">Ignorer</button>
+      </div>`;
+  }
+  resultEl.style.display = 'none';
+  haptic('success');
+}
+```
+
+} catch(e) {
+if (resultEl) { resultEl.style.background=‘var(–red-dim)’; resultEl.style.color=‘var(–red)’; resultEl.textContent=’⚠️ Erreur: ’+e.message; }
+} finally {
+if (btn) { btn.disabled = false; btn.innerHTML = ‘📷 Scanner un QR-bill’; }
+}
+}
+
+function addQRBillExpense(parsed) {
+if (!parsed || !parsed.amount) return;
+const date = parsed.due_date || new Date().toISOString().split(‘T’)[0];
+const MNAMES = [‘janvier’,‘février’,‘mars’,‘avril’,‘mai’,‘juin’,‘juillet’,‘août’,‘septembre’,‘octobre’,‘novembre’,‘décembre’];
+const d = new Date(date+‘T12:00:00’);
+const mi = MF.findIndex(mf => mf.toLowerCase().includes(String(d.getFullYear())) && mf.toLowerCase().includes(MNAMES[d.getMonth()]));
+EXP.push({
+id: Date.now(),
+cat: parsed.category || ‘Autre’,
+desc: (parsed.creditor || parsed.description || ‘QR-bill’) + (parsed.reference ? ’ — ’ + parsed.reference.slice(-8) : ‘’),
+amount: parseFloat(parsed.amount),
+month: mi >= 0 ? mi : CUR,
+date,
+userId: ACTIVE_USER_ID || ‘tau’,
+qrBill: true,
+});
+save(); refresh();
+haptic(‘success’);
+showFB(‘✅ Facture ajoutée en dépense !’, ‘var(–green)’);
+document.getElementById(‘qr-bill-details’).style.display = ‘none’;
+}
+
+// ═══════════════════════════════════════
+// FEATURE 4 — SIMULATEUR LPP
+// ═══════════════════════════════════════
+function calcLPP() {
+const salary     = parseFloat(document.getElementById(‘lpp-salary’)?.value) || 0;
+const age        = parseInt(document.getElementById(‘lpp-age’)?.value) || 35;
+const retireAge  = parseInt(document.getElementById(‘lpp-retire’)?.value) || 65;
+const capital    = parseFloat(document.getElementById(‘lpp-capital’)?.value) || 0;
+const gender     = document.getElementById(‘lpp-gender’)?.value || ‘M’;
+
+if (!salary || !age) return;
+
+// Déduction de coordination 2026
+const coordDed = 26460;
+const salaryInsured = Math.max(0, Math.min(salary, 90720) - coordDed);
+const yearsLeft = Math.max(0, retireAge - age);
+
+// Taux de cotisation selon l’âge
+const getRate = (a) => {
+if (a < 25) return 0;
+if (a < 35) return 0.07;
+if (a < 45) return 0.10;
+if (a < 55) return 0.15;
+return 0.18;
+};
+
+// Simulation année par année
+let projectedCapital = capital;
+const interestRate = 0.01; // taux minimum LPP 2026
+for (let y = 0; y < yearsLeft; y++) {
+const ageY = age + y;
+const rate = getRate(ageY);
+const annualContrib = salaryInsured * rate;
+projectedCapital = (projectedCapital + annualContrib) * (1 + interestRate);
+}
+
+// Taux de conversion LPP (taux légal 6.8%)
+const conversionRate = gender === ‘F’ ? 0.068 : 0.068;
+const annualPension = projectedCapital * conversionRate;
+const monthlyPension = annualPension / 12;
+
+// AVS estimation simple (rente max 2026: 2520/mois)
+const avsMonthly = Math.min(2520, Math.max(1260, salary / 12 * 0.1));
+
+const totalMonthly = monthlyPension + avsMonthly;
+
+const resEl = document.getElementById(‘lpp-results’);
+if (resEl) {
+resEl.style.display = ‘block’;
+resEl.innerHTML = ` <div class="section-label" style="margin-top:.5rem;">Résultats simulés</div> <div class="card" style="margin-bottom:.85rem;background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(0,212,255,.05));border:1px solid rgba(139,92,246,.2);"> <div style="text-align:center;padding:16px 16px 8px;"> <div style="font-size:.65rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Rente mensuelle totale estimée</div> <div style="font-size:2.5rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--cyan)">${F(Math.round(totalMonthly))} <span style="font-size:.9rem">CHF</span></div> <div style="font-size:.68rem;color:var(--muted2);margin-top:4px;">à ${retireAge} ans (dans ${yearsLeft} ans)</div> </div> </div> <div class="card" style="margin-bottom:.85rem;"> <div class="stat-row"><span class="stat-label">Salaire assuré LPP</span><span class="stat-val">${F(Math.round(salaryInsured))} CHF</span></div> <div class="stat-row"><span class="stat-label">Capital LPP projeté</span><span class="stat-val" style="color:var(--violet)">${F(Math.round(projectedCapital))} CHF</span></div> <div class="stat-row"><span class="stat-label">Rente LPP mensuelle</span><span class="stat-val" style="color:var(--violet)">${F(Math.round(monthlyPension))} CHF</span></div> <div class="stat-row"><span class="stat-label">Rente AVS estimée</span><span class="stat-val" style="color:var(--cyan)">${F(Math.round(avsMonthly))} CHF</span></div> <div class="stat-row" style="border-top:1px solid var(--border2);"><span class="stat-label" style="font-weight:700;">Total mensuel</span><span class="stat-val" style="color:var(--cyan);font-size:1rem;font-weight:800;">${F(Math.round(totalMonthly))} CHF</span></div> </div> <div class="alert alert-info" style="font-size:.72rem;line-height:1.6;">⚠️ Estimation indicative. Taux de conversion LPP: ${(conversionRate*100).toFixed(1)}%. Rendement LPP: ${(interestRate*100).toFixed(1)}%/an (taux minimum légal 2026). Consulte ton caisse de pension pour des chiffres précis.</div>`;
+}
+}
+
+// ═══════════════════════════════════════
+// FEATURE 5 — INTÉGRATION NEON/YUH
+// ═══════════════════════════════════════
+function renderNeonYuh() {
+const el = document.getElementById(‘neon-yuh-content’);
+if (!el) return;
+const connections = JSON.parse(localStorage.getItem(‘pace_ch_banks’) || ‘[]’);
+
+el.innerHTML = `
+<div class="info-box" style="margin-bottom:.85rem;">
+<strong>🏦 Néobanques suisses supportées</strong>
+Neon, Yuh, Zak, Alpian, Neon Business — Import CSV natif avec détection automatique du format.
+</div>
+
+```
+<div class="card" style="margin-bottom:.85rem;">
+  <div class="card-head" style="margin-bottom:8px;"><div class="card-title">🟢 Neon Bank</div></div>
+  <div style="padding:0 16px 12px;">
+    <div style="font-size:.75rem;color:var(--muted2);line-height:1.7;margin-bottom:.75rem;">
+      <strong style="color:var(--ink2);">Export CSV depuis Neon :</strong><br>
+      1. App Neon → Compte → Icône téléchargement<br>
+      2. Sélectionne la période → Format CSV<br>
+      3. Importe le fichier ci-dessous
+    </div>
+    <input type="file" id="neon-csv" accept=".csv" style="display:none" onchange="importChBankCSV(this,'neon')">
+    <button class="btn btn-cyan btn-full" onclick="document.getElementById('neon-csv').click()">📥 Importer Neon CSV</button>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:.85rem;">
+  <div class="card-head" style="margin-bottom:8px;"><div class="card-title">🟡 Yuh Bank</div></div>
+  <div style="padding:0 16px 12px;">
+    <div style="font-size:.75rem;color:var(--muted2);line-height:1.7;margin-bottom:.75rem;">
+      <strong style="color:var(--ink2);">Export CSV depuis Yuh :</strong><br>
+      1. App Yuh → Mouvements → Filtrer<br>
+      2. Export → CSV (format PostFinance compatible)<br>
+      3. Importe le fichier ci-dessous
+    </div>
+    <input type="file" id="yuh-csv" accept=".csv" style="display:none" onchange="importChBankCSV(this,'yuh')">
+    <button class="btn btn-secondary btn-full" onclick="document.getElementById('yuh-csv').click()">📥 Importer Yuh CSV</button>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:.85rem;">
+  <div class="card-head" style="margin-bottom:8px;"><div class="card-title">⚫ Zak / Alpian / Autres</div></div>
+  <div style="padding:0 16px 12px;">
+    <div style="font-size:.75rem;color:var(--muted2);line-height:1.6;margin-bottom:.75rem;">Utilise l'import CSV générique — compatible avec tous les formats de banques suisses.</div>
+    <input type="file" id="generic-ch-csv" accept=".csv" style="display:none" onchange="importChBankCSV(this,'generic')">
+    <button class="btn btn-secondary btn-full" onclick="document.getElementById('generic-ch-csv').click()">📄 Import CSV générique</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head" style="margin-bottom:8px;"><div class="card-title">Formats détectés automatiquement</div></div>
+  <div style="padding:0 16px 12px;display:flex;flex-direction:column;gap:.3rem;font-size:.75rem;">
+    ${[['✅','Neon','Date, Description, Montant, Catégorie, Compte'],
+       ['✅','Yuh (PostFinance)','Datum, Texte, Crédit CHF, Débit CHF'],
+       ['✅','Revolut','Type, Completed Date, Description, Amount'],
+       ['✅','UBS','Buchungsdatum, Buchungstext, Betrag'],
+       ['✅','Raiffeisen','Datum, Beschreibung, Betrag, Saldo'],
+       ['✅','PostFinance','Date, Texte, Crédit CHF, Débit CHF, Solde']
+      ].map(([s,b,f]) => `<div style="display:flex;align-items:flex-start;gap:.5rem;"><span style="color:var(--green);font-weight:700;">${s}</span><div><strong>${b}</strong><br><span style="color:var(--muted2)">${f}</span></div></div>`).join('')}
+  </div>
+</div>`;
+```
+
+}
+
+function importChBankCSV(input, bankType) {
+if (!input.files || !input.files[0]) return;
+const reader = new FileReader();
+reader.onload = e => {
+const text = e.target.result;
+const lines = text.split(’\n’).map(l => l.trim()).filter(Boolean);
+if (lines.length < 2) { alert(‘Fichier vide’); return; }
+const header = lines[0].toLowerCase();
+const results = [];
+let skipped = 0;
+
+```
+// Detect Neon format: Date,Description,Amount,Category,Account
+const isNeon = header.includes('category') && header.includes('description') && !header.includes('completed');
+// Detect Raiffeisen
+const isRaiffeisen = header.includes('beschreibung') || header.includes('buchungstext');
+// Otherwise fallback to existing importCSV logic
+if (!isNeon && !isRaiffeisen) { importCSV(input); return; }
+
+const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase().replace(/"/g,''));
+
+for (let i = 1; i < lines.length; i++) {
+  const cols = parseCSVLine(lines[i]).map(v => v.trim().replace(/^"|"$/g,''));
+  let date='', desc='', amount=0;
+
+  if (isNeon) {
+    const iDate=headers.indexOf('date'), iDesc=headers.indexOf('description'), iAmt=headers.indexOf('amount');
+    date = iDate>=0 ? cols[iDate] : '';
+    if (date && date.includes('.')) { const p=date.split('.'); date=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; }
+    desc = iDesc>=0 ? cols[iDesc] : '';
+    const raw = iAmt>=0 ? parseFloat(cols[iAmt].replace(',','.')) : 0;
+    if (isNaN(raw)||raw>=0) { skipped++; continue; }
+    amount = Math.abs(raw);
+  } else if (isRaiffeisen) {
+    const iDate=headers.findIndex(h=>h.includes('datum')), iDesc=headers.findIndex(h=>h.includes('beschreibung')||h.includes('text')), iAmt=headers.findIndex(h=>h.includes('betrag'));
+    const rawDate = iDate>=0 ? cols[iDate] : '';
+    if (rawDate.includes('.')) { const p=rawDate.split('.'); date=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; }
+    desc = iDesc>=0 ? cols[iDesc] : '';
+    const raw = iAmt>=0 ? parseFloat(cols[iAmt].replace(/\s/g,'').replace(',','.')) : 0;
+    if (isNaN(raw)||raw>=0) { skipped++; continue; }
+    amount = Math.abs(raw);
+  }
+
+  if (amount>0 && date) {
+    const d=new Date(date+'T12:00:00'), y=d.getFullYear(), mo=d.getMonth();
+    const MNAMES=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+    const mi=MF.findIndex(mf=>mf.toLowerCase().includes(String(y))&&mf.toLowerCase().includes(MNAMES[mo]));
+    results.push({ id:Date.now()+i, cat:detectCategoryFromDesc(desc), desc:desc||'Import', amount, month:mi>=0?mi:CUR, date, userId:ACTIVE_USER_ID||'tau' });
+  } else skipped++;
+}
+
+if (results.length===0) { alert('Aucune transaction détectée.'); return; }
+const existing=new Set(EXP.map(e=>`${e.date}_${e.amount}_${e.desc}`));
+const toAdd=results.filter(r=>!existing.has(`${r.date}_${r.amount}_${r.desc}`));
+if (!confirm(`Importer ${toAdd.length} transactions depuis ${bankType} ? (${skipped} ignorées)`)) return;
+EXP.push(...toAdd); save(); refresh();
+haptic('success');
+showFB(`✅ ${toAdd.length} transactions ${bankType} importées !`, 'var(--green)');
+```
+
+};
+reader.readAsText(input.files[0], ‘UTF-8’);
+}
+
+// ── LAYOUT FIX: Force correct visibility on mobile ──
+function fixMobileLayout() {
+const isMobile = window.innerWidth < 768;
+const sidebar  = document.querySelector(’.sidebar’);
+const topbar   = document.querySelector(’.topbar’);
+const mobHeader = document.querySelector(’.mob-header’);
+const tabBar   = document.querySelector(’.tab-bar’);
+if (!sidebar) return;
+if (isMobile) {
+sidebar.style.setProperty(‘display’, ‘none’, ‘important’);
+if (topbar) topbar.style.setProperty(‘display’, ‘none’, ‘important’);
+if (mobHeader) mobHeader.style.setProperty(‘display’, ‘flex’, ‘important’);
+if (tabBar) tabBar.style.setProperty(‘display’, ‘flex’, ‘important’);
+} else {
+sidebar.style.removeProperty(‘display’);
+if (topbar) topbar.style.removeProperty(‘display’);
+if (mobHeader) mobHeader.style.setProperty(‘display’, ‘none’, ‘important’);
+if (tabBar) tabBar.style.setProperty(‘display’, ‘none’, ‘important’);
+}
+}
+fixMobileLayout();
+window.addEventListener(‘resize’, fixMobileLayout);
+
+// ── BOOT ──
+// Show splash
+showSplash();
+// Init standing orders
+STANDING_ORDERS=JSON.parse(localStorage.getItem(‘pace_standing_orders’)||’[]’);
+// Auto-run standing orders if due
+setTimeout(()=>runStandingOrders(),1500);
+// Init trips
+TRIPS=JSON.parse(localStorage.getItem(‘pace_trips’)||’[]’);
+ACTIVE_TRIP_ID=localStorage.getItem(‘pace_active_trip’)||null;
+// Offline banner
+window.addEventListener(‘offline’, () => { const b=document.getElementById(‘offline-banner’); if(b)b.classList.add(‘show’); });
+window.addEventListener(‘online’,  () => { const b=document.getElementById(‘offline-banner’); if(b)b.classList.remove(‘show’); });
+// SW + smart notifs init
+setTimeout(() => {
+updateOfflineStatus();
+if(localStorage.getItem(‘pace_smart_notif’)===‘1’) scheduleSmartNotifications();
+const snEl=document.getElementById(‘smart-notif-toggle’);
+if(snEl&&localStorage.getItem(‘pace_smart_notif’)===‘1’) snEl.classList.add(‘on’);
+}, 500);
+// Fetch FX rates in background
+setTimeout(fetchFXRates, 2000);
+// Check new badges
+setTimeout(() => {
+const earned = getEarnedBadges();
+const prev = JSON.parse(localStorage.getItem(‘pace_prev_badges’) || ‘[]’);
+const newBadges = earned.filter(b => !prev.includes(b.id));
+if (newBadges.length > 0) {
+setTimeout(() => showFB(newBadges[0].icon + ’ Badge débloqué : ’ + newBadges[0].name + ’ !’, ‘var(–amber)’), 2500);
+localStorage.setItem(‘pace_prev_badges’, JSON.stringify(earned.map(b => b.id)));
+}
+}, 3000);
+// Load theme
+loadTheme();
+// Apply saved icon
+applyAppIcon();
+// Load custom data
+CAT_COLORS_CUSTOM = JSON.parse(localStorage.getItem(‘pace_cat_colors’) || ‘null’) || {…CAT_COLORS_DEFAULT};
+FAVORITES = JSON.parse(localStorage.getItem(‘pace_favorites’) || ‘[]’);
+AUTO_LOCK_MINUTES = parseInt(localStorage.getItem(‘pace_autolock’) || ‘0’);
+USERS = JSON.parse(localStorage.getItem(‘pace_users’) || ‘[{“id”:“tau”,“name”:“PACE”,“color”:”#00d4ff”,“active”:true}]’);
+ACTIVE_USER_ID = localStorage.getItem(‘pace_active_user’) || ‘tau’;
+// Load custom BR
+const _storedBR2 = getActiveBR(); if (_storedBR2) { BR_CUSTOM = _storedBR2; }
+// Load dash layout
+loadDashLayout();
+// Update user avatar
+updateUserAvatarInHeader();
+// Notification toggle
+if (localStorage.getItem(‘pace_notif’) === ‘1’) {
+const el = document.getElementById(‘notif-toggle’); if (el) el.classList.add(‘on’);
+scheduleMonthlyReminder();
+}
+// Auto-lock setup
+if (AUTO_LOCK_MINUTES > 0) resetAutoLock();
+// Check PIN on load
+const storedPin = localStorage.getItem(‘pace_pin’);
+if (storedPin) {
+const bioOn = localStorage.getItem(‘pace_bio’) === ‘1’;
+showPinScreen(‘unlock’);
+if (bioOn) { setTimeout(tryBiometric, 400); }
+}
+initAll();
+refresh();
+
+</script>
+
+<!-- PIN LOCK SCREEN -->
+
+<div class="pin-screen" id="pinScreen" style="display:none;">
+  <div class="pin-logo">T</div>
+  <div class="pin-title">PACE</div>
+  <div class="pin-subtitle" id="pin-screen-subtitle">Entrez votre code PIN</div>
+  <div class="pin-dots" id="pin-dots">
+    <div class="pin-dot" id="pd0"></div>
+    <div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div>
+    <div class="pin-dot" id="pd3"></div>
+  </div>
+  <div class="pin-error" id="pin-error"></div>
+  <div class="pin-keypad">
+    <button class="pin-key" onclick="pinKey('1')">1</button>
+    <button class="pin-key" onclick="pinKey('2')">2</button>
+    <button class="pin-key" onclick="pinKey('3')">3</button>
+    <button class="pin-key" onclick="pinKey('4')">4</button>
+    <button class="pin-key" onclick="pinKey('5')">5</button>
+    <button class="pin-key" onclick="pinKey('6')">6</button>
+    <button class="pin-key" onclick="pinKey('7')">7</button>
+    <button class="pin-key" onclick="pinKey('8')">8</button>
+    <button class="pin-key" onclick="pinKey('9')">9</button>
+    <button class="pin-key bio" onclick="tryBiometric()">👤</button>
+    <button class="pin-key" onclick="pinKey('0')">0</button>
+    <button class="pin-key del" onclick="pinDel()">⌫</button>
+  </div>
+  <div class="pin-link" id="pin-forgot" style="display:none;" onclick="resetPin()">Code oublié ? Réinitialiser</div>
+</div>
+
+<div id="splash" style="display:none;">
+  <div class="splash-logo" id="splash-logo">C</div>
+  <div class="splash-title">PACE</div>
+  <div class="splash-bar"><div class="splash-bar-fill" id="splash-bar-fill"></div></div>
+</div>
+<div id="undo-toast"></div>
+</body>
+</html><!-- ══ IMPORT CSV ══ -->
+    <div class="page" id="page-importcsv">
+      <div class="month-badge">📊 Import CSV</div>
+
+```
+  <!-- REVOLUT CARD -->
+  <div class="card" style="margin-bottom:.85rem;background:linear-gradient(135deg,rgba(0,212,255,.06),rgba(139,92,246,.04));border:1px solid rgba(0,212,255,.15);">
+    <div class="card-head" style="margin-bottom:.5rem;">
+      <div class="card-title" style="color:var(--cyan)">🔄 Revolut</div>
+      <div style="font-size:.62rem;background:var(--cyan-dim);color:var(--cyan);padding:2px 8px;border-radius:10px;font-weight:700;">Détection auto</div>
+    </div>
+    <div style="padding:0 1.1rem .85rem;">
+      <div style="font-size:.75rem;color:var(--muted2);line-height:1.7;margin-bottom:.75rem;">
+        <strong style="color:var(--ink2);">Comment exporter depuis Revolut :</strong><br>
+        1. Ouvre l'app Revolut<br>
+        2. Va dans <strong>Compte</strong> → <strong>Relevés</strong><br>
+        3. Sélectionne la période<br>
+        4. Appuie sur <strong>Télécharger CSV</strong><br>
+        5. Importe le fichier ci-dessous
+      </div>
+      <input type="file" id="csv-input-revolut" accept=".csv" style="display:none" onchange="importCSV(this)">
+      <button class="btn btn-cyan btn-full" onclick="document.getElementById('csv-input-revolut').click()">
+        📥 Importer depuis Revolut
+      </button>
+      <div style="font-size:.62rem;color:var(--muted2);margin-top:.4rem;text-align:center;">Seules les dépenses (montants négatifs) sont importées. Les virements et crédits sont ignorés.</div>
+    </div>
+  </div>
+
+  <!-- AUTRES BANQUES -->
+  <div class="card" style="margin-bottom:.85rem;">
+    <div class="card-head" style="margin-bottom:.5rem;"><div class="card-title">🏦 Autres banques</div></div>
+    <div style="padding:0 1.1rem .85rem;">
+      <div style="font-size:.75rem;color:var(--muted2);line-height:1.6;margin-bottom:.75rem;">
+        Compatible PostFinance, UBS, Raiffeisen et tout format CSV standard. Format attendu : Date, Description, Montant.
+      </div>
+      <input type="file" id="csv-input" accept=".csv,.txt" style="display:none" onchange="importCSV(this)">
+      <button class="btn btn-secondary btn-full" onclick="document.getElementById('csv-input').click()">📄 Choisir un fichier CSV</button>
+    </div>
+  </div>
+
+  <!-- FORMAT INFO -->
+  <div class="card">
+    <div class="card-head" style="margin-bottom:.5rem;"><div class="card-title">Formats supportés</div></div>
+    <div style="padding:0 1.1rem .85rem;">
+      <div style="display:flex;flex-direction:column;gap:.4rem;font-size:.75rem;">
+        <div style="display:flex;align-items:center;gap:.5rem;"><span style="color:var(--green);font-weight:700;">✓</span> <span><strong>Revolut</strong> — détection automatique</span></div>
+        <div style="display:flex;align-items:center;gap:.5rem;"><span style="color:var(--green);font-weight:700;">✓</span> <span><strong>PostFinance</strong> — Date, Texte, Débit CHF</span></div>
+        <div style="display:flex;align-items:center;gap:.5rem;"><span style="color:var(--green);font-weight:700;">✓</span> <span><strong>UBS</strong> — Buchungstext, Betrag</span></div>
+        <div style="display:flex;align-items:center;gap:.5rem;"><span style="color:var(--green);font-weight:700;">✓</span> <span><strong>CSV générique</strong> — Date, Description, Montant</span></div>
+      </div>
+      <pre style="margin-top:.75rem;font-size:.62rem;color:var(--muted2);font-family:'JetBrains Mono',monospace;line-height:1.7;overflow-x:auto;background:var(--bg2);padding:.5rem .75rem;border-radius:6px;">Revolut CSV:
+```
+
+Type,Product,Started Date,Completed Date,Description,Amount,Fee,Currency,State,Balance
+CARD_PAYMENT,Current,-45.80,CHF,COMPLETED
+Migros,2026-03-15 10:23:45,-45.80,0.00,CHF</pre>
+</div>
+</div>
+</div>
